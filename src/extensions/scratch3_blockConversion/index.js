@@ -151,11 +151,9 @@ ExampleExtension.prototype.getInfo = function () {
  * @property {string} TEXT - the string value of the argument.
  * @returns {string} a string which includes the block argument value.
  */
-ExampleExtension.prototype.scroll = function () {
+ExampleExtension.prototype.stackRead = function (args) {
     // Note: this implementation is not Unicode-clean; it's just here as an example.
-    
-
-    return scrollvar;
+return args.STACK.toString();
 };
 
 ExampleExtension.prototype.ku = function () {
