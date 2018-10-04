@@ -12,6 +12,8 @@ npm-*
 # Editor
 /.idea
 /.vscode
+*.~/
+*~
 
 # Build
 /dist
