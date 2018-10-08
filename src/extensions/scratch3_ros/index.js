@@ -10,9 +10,10 @@ const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34
 class Scratch3RosBlocks {
 
     constructor(runtime) {
+	var rosIP = prompt('Input IP address:');
 	alert('Remember to enable connections with ROS:\n\n roslaunch rosbridge_server rosbridge_websocket.launch');
 
-	this.ros = new RosUtil({ url : 'ws://localhost:9090' });
+	this.ros = new RosUtil({ url : 'wss://' + rosIP + ':9090' });
 	this.topicNames = ['topic'];
 	this.serviceNames = ['service'];
 	this.runtime = runtime;
