@@ -81,6 +81,8 @@ class RosUtil extends ROSLIB.Ros {
 		    if (ex === '[]') ex = [ex];
 		};
 	    default:
+		var num = parseInt(ex);
+		if (!isNaN(num)) ex = num;
 		result[obj.fieldnames[i]] = ex;
 	    };
 	};	

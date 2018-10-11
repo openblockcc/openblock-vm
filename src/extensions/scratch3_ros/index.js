@@ -13,7 +13,7 @@ class Scratch3RosBlocks {
 	var rosIP = prompt('Input IP address:');
 	alert('Remember to enable connections with ROS:\n\n roslaunch rosbridge_server rosbridge_websocket.launch');
 
-	this.ros = new RosUtil({ url : 'wss://' + rosIP + ':9090' });
+	this.ros = new RosUtil({ url : 'ws://' + rosIP + ':9090' });
 	this.topicNames = ['topic'];
 	this.serviceNames = ['service'];
 	this.runtime = runtime;
@@ -80,15 +80,40 @@ class Scratch3RosBlocks {
     };
 
     setSlot({OBJ, SLOT, VALUE}) {
-	var object = {};
+	function setNestedValue(obj, slots, value) {
+	    var last = slots.length - 1;
+	    for(var i = 0; i < last; i++)
+		obj = obj[ slots[i] ] = obj[ slots[i] ] || {};
+
+	    obj = obj[slots[last]] = value;
+	};
+
+	var obj = {};
+	var slt = SLOT.split('.');
+	var val = VALUE;
 	try {
-	    let obj = JSON.parse(OBJ);
-	    if (typeof(obj) === 'object') object = obj;
+	    let tmp = JSON.parse(OBJ);
+	    if (typeof(tmp) === 'object') obj = tmp;
 	} catch(err) {}
-	eval('object.' + SLOT + '=' + VALUE);
-	return JSON.stringify(object);
+
+	try {
+	    val = JSON.parse(VALUE);
+	} catch(err) {}
+
+	setNestedValue(obj, slt, val);
+	return JSON.stringify(obj);
     };
 			  
+    waitInterpolation() {
+	var ROS = this.ros;
+	return new Promise( function(resolve) {
+	    ROS.getTopic('/move_group/result').then(
+		rosTopic =>
+		    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
+						resolve(); }));
+	});
+    };
+
     _updateTopicList() {
 	var that = this;
 	that.ros.getTopics( function(topics){
@@ -225,9 +250,14 @@ class Scratch3RosBlocks {
 			},
 			VALUE: {
 			    type: ArgumentType.STRING,
-			    defaultValue: '"Hello!"'
+			    defaultValue: 'Hello!'
 			}
 		    }
+		},
+		{
+		    opcode: 'waitInterpolation',
+		    blockType: BlockType.COMMAND,
+		    text: 'Wait interpolation',
 		}
 	    ],
 	    menus: {
