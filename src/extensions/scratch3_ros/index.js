@@ -1,5 +1,3 @@
-//import * as ROSLIB from 'roslib';
-
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');

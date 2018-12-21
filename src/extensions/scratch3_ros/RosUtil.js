@@ -1,4 +1,4 @@
-import * as ROSLIB from 'roslib'
+const ROSLIB = require('roslib')
 
 const std_msgs_array = {
     byte: 'std_msgs/Byte',
