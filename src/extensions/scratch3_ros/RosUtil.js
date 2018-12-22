@@ -16,78 +16,78 @@ const std_msgs_array = {
 
 class RosUtil extends ROSLIB.Ros {
     constructor(options) {
-	super(options)
+        super(options)
     };
 
     getMessageDetailsByTopic(topic) {
-	var ros = this;
-	return new Promise( function(resolve,reject) {	
-	    ros.getTopicType(
-		topic,
-		type => ros.getMessageDetails(type,resolve))
-	});
+        var ros = this;
+        return new Promise( function(resolve,reject) {
+            ros.getTopicType(
+                topic,
+                type => ros.getMessageDetails(type,resolve))
+        });
     };
 
     getRequestDetailsByService(service) {
-	var ros = this;
-	return new Promise( function(resolve,reject) {	
-	    ros.getServiceType(
-		service,
-		type => ros.getServiceRequestDetails(type, details => resolve(details.typedefs)));
-	});
+        var ros = this;
+        return new Promise( function(resolve,reject) {
+            ros.getServiceType(
+                service,
+                type => ros.getServiceRequestDetails(type, details => resolve(details.typedefs)));
+        });
     };
 
     getTopic(name) {
-	var ros = this;
-	return new Promise( function(resolve,reject) {
-	    ros.getTopicType(
-		name,
-		type =>
-		    resolve(new ROSLIB.Topic({
-			ros : ros,
-			name : name,
-			messageType : type
-		    })));
-	});
+        var ros = this;
+        return new Promise( function(resolve,reject) {
+            ros.getTopicType(
+                name,
+                type =>
+                    resolve(new ROSLIB.Topic({
+                        ros : ros,
+                        name : name,
+                        messageType : type
+                    })));
+        });
     };
 
     getService(name) {
-	var ros = this;
-	return new Promise( function(resolve,reject) {
-	    ros.getServiceType(
-		name,
-		type =>
-		    resolve(new ROSLIB.Service({
-			ros : ros,
-			name : name,
-			serviceType : type
-		    })));
-	});
+        var ros = this;
+        return new Promise( function(resolve,reject) {
+            ros.getServiceType(
+                name,
+                type =>
+                    resolve(new ROSLIB.Service({
+                        ros : ros,
+                        name : name,
+                        serviceType : type
+                    })));
+        });
     };
 
     messageExample(obj, list) {
-	var result = {};
-	for (var i=0, len = obj.fieldnames.length; i<len; i++) {
+        var result = {};
+        for (var i=0, len = obj.fieldnames.length; i<len; i++) {
 
-	    var ex = obj.examples[i];
-	    switch (ex) {
-	    case '[]':
-	    case '{}':
-		if (obj.fieldtypes[i] in std_msgs_array)
-		    ex = ["0"];
-		else {
-		    ex = this.messageExample(
-			list.find( object => object.type === obj.fieldtypes[i]), list);
-		    if (ex === '[]') ex = [ex];
-		};
-	    default:
-		var num = parseInt(ex);
-		if (!isNaN(num)) ex = num;
-		result[obj.fieldnames[i]] = ex;
-	    };
-	};	
+            var ex = obj.examples[i];
+            switch (ex) {
+            case '[]':
+            case '{}':
+                if (obj.fieldtypes[i] in std_msgs_array)
+                    ex = ["0"];
+                else {
+                    ex = this.messageExample(
+                        list.find( object => object.type === obj.fieldtypes[i]), list);
+                    if (ex === '[]') ex = [ex];
+                };
+            default:
+                var num = parseInt(ex);
+                if (!isNaN(num)) ex = num;
+                result[obj.fieldnames[i]] = ex;
+            };
+        };
 
-	return result;
+        return result;
     };
 
 }

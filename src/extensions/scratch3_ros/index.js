@@ -8,71 +8,71 @@ const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34
 class Scratch3RosBlocks {
 
     constructor(runtime) {
-	var rosIP = prompt('Input IP address:');
-	alert('Remember to enable connections with ROS:\n\n roslaunch rosbridge_server rosbridge_websocket.launch');
+        var rosIP = prompt('Input IP address:');
+        alert('Remember to enable connections with ROS:\n\n roslaunch rosbridge_server rosbridge_websocket.launch');
 
-	this.ros = new RosUtil({ url : 'ws://' + rosIP + ':9090' });
-	this.topicNames = ['topic'];
-	this.serviceNames = ['service'];
-	this.runtime = runtime;
+        this.ros = new RosUtil({ url : 'ws://' + rosIP + ':9090' });
+        this.topicNames = ['topic'];
+        this.serviceNames = ['service'];
+        this.runtime = runtime;
     };
 
     makeMessage({TOPIC}) {
-	var ROS = this.ros;
-	return new Promise( function(resolve) {
-	    ROS.getMessageDetailsByTopic(TOPIC).then( function(result) {
-		var example = ROS.messageExample(result[0], result);
-		resolve(JSON.stringify(example)); });
-	});
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            ROS.getMessageDetailsByTopic(TOPIC).then( function(result) {
+                var example = ROS.messageExample(result[0], result);
+                resolve(JSON.stringify(example)); });
+        });
     };
 
     makeRequest({SERVICE}) {
-	var ROS = this.ros;
-	return new Promise( function(resolve) {
-	    ROS.getRequestDetailsByService(SERVICE).then( function(result) {
-		var example = ROS.messageExample(result[0], result);
-		resolve(JSON.stringify(example)); });
-	});
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            ROS.getRequestDetailsByService(SERVICE).then( function(result) {
+                var example = ROS.messageExample(result[0], result);
+                resolve(JSON.stringify(example)); });
+        });
     };
 
     printObject({OBJ}) {
-	alert(JSON.stringify(JSON.parse(OBJ),null,2));
+        alert(JSON.stringify(JSON.parse(OBJ),null,2));
     };
 
     subscribeTopic({TOPIC}) {
-	var ROS = this.ros;
-	return new Promise( function(resolve) {
-	    ROS.getTopic(TOPIC).then(
-		rosTopic =>
-		    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
-						resolve(JSON.stringify(msg)); }));
-	});
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            ROS.getTopic(TOPIC).then(
+                rosTopic =>
+                    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
+                                                resolve(JSON.stringify(msg)); }));
+        });
     };
 
     publishTopic({MSG, TOPIC}) {
-	this.ros.getTopic(TOPIC).then(
-	    rosTopic => rosTopic.publish(JSON.parse(MSG)));
+        this.ros.getTopic(TOPIC).then(
+            rosTopic => rosTopic.publish(JSON.parse(MSG)));
     };
 
     callService({REQUEST, SERVICE}) {
-	var ROS = this.ros;
-	return new Promise( function(resolve) {
-	    ROS.getService(SERVICE).then(
-		rosService => rosService.callService(JSON.parse(REQUEST),
-						     res => { rosService.unadvertise();
-							      resolve(JSON.stringify(res)); }));
-	});
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            ROS.getService(SERVICE).then(
+                rosService => rosService.callService(JSON.parse(REQUEST),
+                                                     res => { rosService.unadvertise();
+                                                              resolve(JSON.stringify(res)); }));
+        });
     };
 
     getSlot({VAR, SLOT}, util) {
         const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return undefined;
-	var res = eval('JSON.parse(variable.value)' + '.' + SLOT);
+        var res = eval('JSON.parse(variable.value)' + '.' + SLOT);
 
-	if (typeof(res) === 'object')
-	    return JSON.stringify(res);
-	else
-	    return res;
+        if (typeof(res) === 'object')
+            return JSON.stringify(res);
+        else
+            return res;
     };
 
     setSlot({VAR, SLOT, VALUE}, util) {
@@ -80,54 +80,54 @@ class Scratch3RosBlocks {
         if (!variable) return;
 
         function setNestedValue(obj, slots, value) {
-	    var last = slots.length - 1;
-	    for(var i = 0; i < last; i++)
-		obj = obj[ slots[i] ] = obj[ slots[i] ] || {};
+            var last = slots.length - 1;
+            for(var i = 0; i < last; i++)
+                obj = obj[ slots[i] ] = obj[ slots[i] ] || {};
 
-	    obj = obj[slots[last]] = value;
-	};
+            obj = obj[slots[last]] = value;
+        };
 
-	var obj = {};
-	var slt = SLOT.split('.');
-	var val = VALUE;
+        var obj = {};
+        var slt = SLOT.split('.');
+        var val = VALUE;
 
-	try {
-	    let tmp = JSON.parse(variable.value);
-	    if (typeof(tmp) === 'object') obj = tmp;
-	} catch(err) {}
+        try {
+            let tmp = JSON.parse(variable.value);
+            if (typeof(tmp) === 'object') obj = tmp;
+        } catch(err) {}
 
-	try {
-	    val = JSON.parse(VALUE);
-	} catch(err) {}
+        try {
+            val = JSON.parse(VALUE);
+        } catch(err) {}
 
-	setNestedValue(obj, slt, val);
-	variable.value = JSON.stringify(obj);
+        setNestedValue(obj, slt, val);
+        variable.value = JSON.stringify(obj);
         // TODO: cloud variables
     };
-			  
+
     waitInterpolation() {
-	var ROS = this.ros;
-	return new Promise( function(resolve) {
-	    ROS.getTopic('/move_group/result').then(
-		rosTopic =>
-		    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
-						resolve(); }));
-	});
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            ROS.getTopic('/move_group/result').then(
+                rosTopic =>
+                    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
+                                                resolve(); }));
+        });
     };
 
     _updateTopicList() {
-	var that = this;
-	that.ros.getTopics( function(topics){
-	    that.topicNames = topics.topics.sort(); });
+        var that = this;
+        that.ros.getTopics( function(topics){
+            that.topicNames = topics.topics.sort(); });
 
-	return that.topicNames.map(function(val) { return {value: val, text: val}; });
+        return that.topicNames.map(function(val) { return {value: val, text: val}; });
     };
 
     _updateServiceList() {
-	var that = this;
-	that.ros.getServices( function(services){
-	    that.serviceNames = services.sort(); });
-	return that.serviceNames.map(function(val) { return {value: val, text: val}; });
+        var that = this;
+        that.ros.getServices( function(services){
+            that.serviceNames = services.sort(); });
+        return that.serviceNames.map(function(val) { return {value: val, text: val}; });
     };
 
     _updateVariablesList() {
@@ -139,144 +139,144 @@ class Scratch3RosBlocks {
     };
 
     getInfo() {
-	return {
-	    id: 'ros',
-	    name: 'ROS',
+        return {
+            id: 'ros',
+            name: 'ROS',
 
-	    colour: '#8BC34A',
-	    colourSecondary: '#7CB342',
-	    colourTertiary: '#689F38',
+            colour: '#8BC34A',
+            colourSecondary: '#7CB342',
+            colourTertiary: '#689F38',
 
-	    menuIconURI: icon,
+            menuIconURI: icon,
 
-	    blocks: [
-		{
-		    opcode: 'subscribeTopic',
-		    blockType: BlockType.REPORTER,
-		    text: 'Get message from [TOPIC]',
-		    arguments: {
-			TOPIC: {
-			    type: ArgumentType.STRING,
-			    menu: 'topicsMenu',
-			    defaultValue: this.topicNames[0]
-			}
-		    }
-		},
-		{
-		    opcode: 'makeMessage',
-		    blockType: BlockType.REPORTER,
-		    text: 'Create message for [TOPIC]',
-		    arguments: {
-			TOPIC: {
-			    type: ArgumentType.STRING,
-			    menu: 'topicsMenu',
-			    defaultValue: this.topicNames[0]
-			}
-		    }
-		},
-		{
-		    opcode: 'publishTopic',
-		    blockType: BlockType.COMMAND,
-		    text: 'Publish [MSG] to [TOPIC]',
-		    arguments: {
-			MSG: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'message'
-			},
-			TOPIC: {
-			    type: ArgumentType.STRING,
-			    menu: 'topicsMenu',
-			    defaultValue: this.topicNames[0]
-			}
-		    }
-		},
-		{
-		    opcode: 'makeRequest',
-		    blockType: BlockType.REPORTER,
-		    text: 'Create request for [SERVICE]',
-		    arguments: {
-			SERVICE: {
-			    type: ArgumentType.STRING,
-			    menu: 'servicesMenu',
-			    defaultValue: this.serviceNames[0]
-			}
-		    }
-		},
-		{
-		    opcode: 'callService',
-		    blockType: BlockType.REPORTER,
-		    text: 'Send [REQUEST] to [SERVICE]',
-		    arguments: {
-			REQUEST: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'request'
-			},
-			SERVICE: {
-			    type: ArgumentType.STRING,
-			    menu: 'servicesMenu',
-			    defaultValue: this.serviceNames[0]
-			}
-		    }
-		},
-		{
-		    opcode: 'printObject',
-		    blockType: BlockType.COMMAND,
-		    text: 'Print [OBJ]',
-		    arguments: {
-			OBJ: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'object'
-			}
-		    }
-		},
-		{
-		    opcode: 'getSlot',
-		    blockType: BlockType.REPORTER,
-		    text: 'Get [VAR] [SLOT]',
-		    arguments: {
-			VAR: {
-			    type: ArgumentType.STRING,
+            blocks: [
+                {
+                    opcode: 'subscribeTopic',
+                    blockType: BlockType.REPORTER,
+                    text: 'Get message from [TOPIC]',
+                    arguments: {
+                        TOPIC: {
+                            type: ArgumentType.STRING,
+                            menu: 'topicsMenu',
+                            defaultValue: this.topicNames[0]
+                        }
+                    }
+                },
+                {
+                    opcode: 'makeMessage',
+                    blockType: BlockType.REPORTER,
+                    text: 'Create message for [TOPIC]',
+                    arguments: {
+                        TOPIC: {
+                            type: ArgumentType.STRING,
+                            menu: 'topicsMenu',
+                            defaultValue: this.topicNames[0]
+                        }
+                    }
+                },
+                {
+                    opcode: 'publishTopic',
+                    blockType: BlockType.COMMAND,
+                    text: 'Publish [MSG] to [TOPIC]',
+                    arguments: {
+                        MSG: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'message'
+                        },
+                        TOPIC: {
+                            type: ArgumentType.STRING,
+                            menu: 'topicsMenu',
+                            defaultValue: this.topicNames[0]
+                        }
+                    }
+                },
+                {
+                    opcode: 'makeRequest',
+                    blockType: BlockType.REPORTER,
+                    text: 'Create request for [SERVICE]',
+                    arguments: {
+                        SERVICE: {
+                            type: ArgumentType.STRING,
+                            menu: 'servicesMenu',
+                            defaultValue: this.serviceNames[0]
+                        }
+                    }
+                },
+                {
+                    opcode: 'callService',
+                    blockType: BlockType.REPORTER,
+                    text: 'Send [REQUEST] to [SERVICE]',
+                    arguments: {
+                        REQUEST: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'request'
+                        },
+                        SERVICE: {
+                            type: ArgumentType.STRING,
+                            menu: 'servicesMenu',
+                            defaultValue: this.serviceNames[0]
+                        }
+                    }
+                },
+                {
+                    opcode: 'printObject',
+                    blockType: BlockType.COMMAND,
+                    text: 'Print [OBJ]',
+                    arguments: {
+                        OBJ: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'object'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getSlot',
+                    blockType: BlockType.REPORTER,
+                    text: 'Get [VAR] [SLOT]',
+                    arguments: {
+                        VAR: {
+                            type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-			    defaultValue: this._updateVariablesList()[0].text
-			},
-			SLOT: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'data'
-			}
-		    }
-		},
-		{
-		    opcode: 'setSlot',
-		    blockType: BlockType.COMMAND,
-		    text: 'Set [VAR] [SLOT] to [VALUE]',
-		    arguments: {
-			VAR: {
-			    type: ArgumentType.STRING,
+                            defaultValue: this._updateVariablesList()[0].text
+                        },
+                            SLOT: {
+                                type: ArgumentType.STRING,
+                                defaultValue: 'data'
+                            }
+                    }
+                },
+                {
+                    opcode: 'setSlot',
+                    blockType: BlockType.COMMAND,
+                    text: 'Set [VAR] [SLOT] to [VALUE]',
+                    arguments: {
+                        VAR: {
+                            type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-			    defaultValue: this._updateVariablesList()[0].text
-			},
-			SLOT: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'data'
-			},
-			VALUE: {
-			    type: ArgumentType.STRING,
-			    defaultValue: 'Hello!'
-			}
-		    }
-		},
-		{
-		    opcode: 'waitInterpolation',
-		    blockType: BlockType.COMMAND,
-		    text: 'Wait interpolation',
-		}
-	    ],
-	    menus: {
-		topicsMenu: '_updateTopicList',
-		servicesMenu: '_updateServiceList',
-		variablesMenu: '_updateVariablesList'
-	    }
-	}
+                            defaultValue: this._updateVariablesList()[0].text
+                        },
+                            SLOT: {
+                                type: ArgumentType.STRING,
+                                defaultValue: 'data'
+                            },
+                            VALUE: {
+                                type: ArgumentType.STRING,
+                                defaultValue: 'Hello!'
+                            }
+                    }
+                },
+                {
+                    opcode: 'waitInterpolation',
+                    blockType: BlockType.COMMAND,
+                    text: 'Wait interpolation',
+                }
+            ],
+            menus: {
+                topicsMenu: '_updateTopicList',
+                servicesMenu: '_updateServiceList',
+                variablesMenu: '_updateVariablesList'
+            }
+        }
     }
 }
 
