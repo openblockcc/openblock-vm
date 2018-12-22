@@ -1,3 +1,4 @@
+const JSON = require('circular-json');
 const Cast = require('../util/cast');
 
 class Scratch3DataBlocks {
@@ -38,6 +39,9 @@ class Scratch3DataBlocks {
     getVariable (args, util) {
         const variable = util.target.lookupOrCreateVariable(
             args.VARIABLE.id, args.VARIABLE.name);
+        if (typeof(variable.value) === 'object') {
+            return JSON.stringify(variable.value);
+        }
         return variable.value;
     }
 
@@ -104,6 +108,10 @@ class Scratch3DataBlocks {
             return list.value.slice();
         }
 
+        // Report the value itself
+        return list.value;
+
+        /*
         // Determine if the list is all single letters.
         // If it is, report contents joined together with no separator.
         // If it's not, report contents joined together with a space.
@@ -120,6 +128,7 @@ class Scratch3DataBlocks {
             return list.value.join('');
         }
         return list.value.join(' ');
+        */
 
     }
 

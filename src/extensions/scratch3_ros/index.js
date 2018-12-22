@@ -22,7 +22,7 @@ class Scratch3RosBlocks {
         return new Promise( function(resolve) {
             ROS.getMessageDetailsByTopic(TOPIC).then( function(result) {
                 var example = ROS.messageExample(result[0], result);
-                resolve(JSON.stringify(example)); });
+                resolve(example); });
         });
     };
 
@@ -31,12 +31,12 @@ class Scratch3RosBlocks {
         return new Promise( function(resolve) {
             ROS.getRequestDetailsByService(SERVICE).then( function(result) {
                 var example = ROS.messageExample(result[0], result);
-                resolve(JSON.stringify(example)); });
+                resolve(example); });
         });
     };
 
     printObject({OBJ}) {
-        alert(JSON.stringify(JSON.parse(OBJ),null,2));
+        alert(JSON.stringify(OBJ,null,2));
     };
 
     subscribeTopic({TOPIC}) {
@@ -45,40 +45,35 @@ class Scratch3RosBlocks {
             ROS.getTopic(TOPIC).then(
                 rosTopic =>
                     rosTopic.subscribe(msg => { rosTopic.unsubscribe();
-                                                resolve(JSON.stringify(msg)); }));
+                                                resolve(msg); }));
         });
     };
 
-    publishTopic({MSG, TOPIC}) {
+    publishTopic({MSG, TOPIC}, util) {
+        var msg = this._getVariableValue(MSG) || JSON.parse(MSG);
+
         this.ros.getTopic(TOPIC).then(
-            rosTopic => rosTopic.publish(JSON.parse(MSG)));
+            rosTopic => rosTopic.publish(msg));
     };
 
-    callService({REQUEST, SERVICE}) {
+    callService({REQUEST, SERVICE}, util) {
+        var req = this._getVariableValue(REQUEST) || JSON.parse(REQUEST);
+
         var ROS = this.ros;
         return new Promise( function(resolve) {
             ROS.getService(SERVICE).then(
-                rosService => rosService.callService(JSON.parse(REQUEST),
+                rosService => rosService.callService(req,
                                                      res => { rosService.unadvertise();
-                                                              resolve(JSON.stringify(res)); }));
+                                                              resolve(res); }));
         });
     };
 
-    getSlot({VAR, SLOT}, util) {
-        const variable = util.target.lookupVariableByNameAndType(VAR);
-        if (!variable) return undefined;
-        var res = eval('JSON.parse(variable.value)' + '.' + SLOT);
-
-        if (typeof(res) === 'object')
-            return JSON.stringify(res);
-        else
-            return res;
+    getSlot({OBJECT, SLOT}, util) {
+        var obj = this._getVariableValue(OBJECT) || JSON.parse(OBJECT);
+        return eval('obj' + '.' + SLOT);
     };
 
     setSlot({VAR, SLOT, VALUE}, util) {
-        const variable = util.target.lookupVariableByNameAndType(VAR);
-        if (!variable) return;
-
         function setNestedValue(obj, slots, value) {
             var last = slots.length - 1;
             for(var i = 0; i < last; i++)
@@ -87,21 +82,22 @@ class Scratch3RosBlocks {
             obj = obj[slots[last]] = value;
         };
 
-        var obj = {};
+        function tryParse(val) {
+            try {
+                return JSON.parse(val);
+            } catch(err) { return val; }
+        };
+
+        const variable = util.target.lookupVariableByNameAndType(VAR);
+        if (!variable) return;
+
+        if (typeof(variable.value) !== 'object') variable.value = {};
         var slt = SLOT.split('.');
-        var val = VALUE;
+        if (Array.isArray(VALUE)) var val = VALUE.map(tryParse);
+        else var val = tryParse(VALUE);
 
-        try {
-            let tmp = JSON.parse(variable.value);
-            if (typeof(tmp) === 'object') obj = tmp;
-        } catch(err) {}
+        setNestedValue(variable.value, slt, val);
 
-        try {
-            val = JSON.parse(VALUE);
-        } catch(err) {}
-
-        setNestedValue(obj, slt, val);
-        variable.value = JSON.stringify(obj);
         // TODO: cloud variables
     };
 
@@ -113,6 +109,12 @@ class Scratch3RosBlocks {
                     rosTopic.subscribe(msg => { rosTopic.unsubscribe();
                                                 resolve(); }));
         });
+    };
+
+    _getVariableValue(name, type) {
+        var target = this.runtime.getEditingTarget();
+        var variable = target.lookupVariableByNameAndType(name, type);
+        return variable && variable.value;
     };
 
     _updateTopicList() {
@@ -131,9 +133,12 @@ class Scratch3RosBlocks {
     };
 
     _updateVariablesList() {
-        var varlist = this.runtime.getEditingTarget().getAllVariableNamesInScopeByType();
+        try {
+            var varlist = this.runtime.getEditingTarget().getAllVariableNamesInScopeByType();
+        } catch(err) { return [{value: 'my variable', text: 'my variable'}] }
+
         if (varlist.length == 0)
-            return [''];
+            return [{value: 'my variable', text: 'my variable'}];
         else
             return varlist.map(function(val) {return {value: val, text: val}; });
     };
@@ -181,7 +186,8 @@ class Scratch3RosBlocks {
                     arguments: {
                         MSG: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'message'
+                            menu: 'variablesMenu',
+                            defaultValue: this._updateVariablesList()[0].text
                         },
                         TOPIC: {
                             type: ArgumentType.STRING,
@@ -209,7 +215,8 @@ class Scratch3RosBlocks {
                     arguments: {
                         REQUEST: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'request'
+                            menu: 'variablesMenu',
+                            defaultValue: this._updateVariablesList()[0].text
                         },
                         SERVICE: {
                             type: ArgumentType.STRING,
@@ -232,9 +239,9 @@ class Scratch3RosBlocks {
                 {
                     opcode: 'getSlot',
                     blockType: BlockType.REPORTER,
-                    text: 'Get [VAR] [SLOT]',
+                    text: 'Get [OBJECT] [SLOT]',
                     arguments: {
-                        VAR: {
+                        OBJECT: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
                             defaultValue: this._updateVariablesList()[0].text
