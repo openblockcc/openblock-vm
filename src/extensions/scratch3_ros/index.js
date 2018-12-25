@@ -1,3 +1,4 @@
+const JSON = require('circular-json');
 const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const formatMessage = require('format-message');
@@ -22,6 +23,7 @@ class Scratch3RosBlocks {
         return new Promise( function(resolve) {
             ROS.getMessageDetailsByTopic(TOPIC).then( function(result) {
                 var example = ROS.messageExample(result[0], result);
+                example.toString = function() { return JSON.stringify(this); }
                 resolve(example); });
         });
     };
@@ -31,6 +33,7 @@ class Scratch3RosBlocks {
         return new Promise( function(resolve) {
             ROS.getRequestDetailsByService(SERVICE).then( function(result) {
                 var example = ROS.messageExample(result[0], result);
+                example.toString = function() { return JSON.stringify(this); }
                 resolve(example); });
         });
     };
@@ -45,6 +48,7 @@ class Scratch3RosBlocks {
             ROS.getTopic(TOPIC).then(
                 rosTopic =>
                     rosTopic.subscribe(msg => { rosTopic.unsubscribe();
+                                                msg.toString = function() { return JSON.stringify(this); }
                                                 resolve(msg); }));
         });
     };
@@ -70,7 +74,10 @@ class Scratch3RosBlocks {
 
     getSlot({OBJECT, SLOT}, util) {
         var obj = this._getVariableValue(OBJECT) || JSON.parse(OBJECT);
-        return eval('obj' + '.' + SLOT);
+        var res = eval('obj' + '.' + SLOT);
+        if (typeof(res) === 'object')
+            res.toString = function() { return JSON.stringify(this); }
+        return res;
     };
 
     setSlot({VAR, SLOT, VALUE}, util) {
@@ -91,7 +98,11 @@ class Scratch3RosBlocks {
         const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return;
 
-        if (typeof(variable.value) !== 'object') variable.value = {};
+        if (typeof(variable.value) === 'object')
+            // Clone object to avoid overwriting parent variables
+            variable.value = JSON.parse(JSON.stringify(variable.value));
+        else
+            variable.value = {};
         var slt = SLOT.split('.');
         if (Array.isArray(VALUE)) var val = VALUE.map(tryParse);
         else var val = tryParse(VALUE);
