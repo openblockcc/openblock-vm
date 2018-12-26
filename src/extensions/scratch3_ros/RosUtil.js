@@ -77,6 +77,13 @@ Click 'ok' to reconnect.`;
         });
     };
 
+    getParam(name) {
+        return this.Param({
+            ros: this,
+            name: name
+        });
+    };
+
     messageExample(obj, list) {
         var result = {};
         for (var i=0, len = obj.fieldnames.length; i<len; i++) {

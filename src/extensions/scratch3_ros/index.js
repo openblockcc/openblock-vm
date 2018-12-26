@@ -13,6 +13,7 @@ class Scratch3RosBlocks {
         this.ros = new RosUtil({ url : 'ws://localhost:9090' });
         this.topicNames = ['topic'];
         this.serviceNames = ['service'];
+        this.paramNames = ['param'];
         this.runtime = runtime;
     };
 
@@ -63,6 +64,23 @@ class Scratch3RosBlocks {
                 rosService => rosService.callService(req,
                                                      res => { rosService.unadvertise();
                                                               resolve(res); }));
+        });
+    };
+
+    setParamValue({NAME, VALUE}) {
+        const param = this.ros.getParam(NAME);
+        param.set(this._tryParse(VALUE,VALUE));
+    };
+
+    getParamValue({NAME}) {
+        var ROS = this.ros;
+        return new Promise( function(resolve) {
+            const param = ROS.getParam(NAME);
+            param.get( function(val) {
+                if (typeof(val) === 'object')
+                    val.toString = function() { return JSON.stringify(this); }
+                resolve(val);
+            });
         });
     };
 
@@ -170,7 +188,14 @@ class Scratch3RosBlocks {
         return that.serviceNames.map(function(val) { return {value: val, text: val}; });
     };
 
-    _updateVariablesList() {
+    _updateParamList() {
+        var that = this;
+        that.ros.getParams( function(params){
+            that.paramNames = params.sort(); })
+        return that.paramNames.map(function(val) { return {value: val, text: val}; });
+    };
+
+    _updateVariableList() {
         try {
             var varlist = this.runtime.getEditingTarget().getAllVariableNamesInScopeByType();
         } catch(err) { return [{value: 'my variable', text: 'my variable'}] }
@@ -225,7 +250,7 @@ class Scratch3RosBlocks {
                         MSG: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                         TOPIC: {
                             type: ArgumentType.STRING,
@@ -234,6 +259,7 @@ class Scratch3RosBlocks {
                         }
                     }
                 },
+                '---',
                 {
                     opcode: 'makeRequest',
                     blockType: BlockType.REPORTER,
@@ -254,7 +280,7 @@ class Scratch3RosBlocks {
                         REQUEST: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                         SERVICE: {
                             type: ArgumentType.STRING,
@@ -263,6 +289,36 @@ class Scratch3RosBlocks {
                         }
                     }
                 },
+                '---',
+                {
+                    opcode: 'getParamValue',
+                    blockType: BlockType.REPORTER,
+                    text: 'Get [NAME]',
+                    arguments: {
+                        NAME: {
+                            type: ArgumentType.STRING,
+                            menu: 'paramsMenu',
+                            defaultValue: this._updateParamList()[0].text
+                        }
+                    }
+                },
+                {
+                    opcode: 'setParamValue',
+                    blockType: BlockType.COMMAND,
+                    text: 'Set [NAME] to [VALUE]',
+                    arguments: {
+                        NAME: {
+                            type: ArgumentType.STRING,
+                            menu: 'paramsMenu',
+                            defaultValue: this._updateParamList()[0].text
+                        },
+                        VALUE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 0
+                        }
+                    }
+                },
+                '---',
                 {
                     opcode: 'getSlot',
                     blockType: BlockType.REPORTER,
@@ -271,7 +327,7 @@ class Scratch3RosBlocks {
                         OBJECT: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                             SLOT: {
                                 type: ArgumentType.STRING,
@@ -287,7 +343,7 @@ class Scratch3RosBlocks {
                         VAR: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                             SLOT: {
                                 type: ArgumentType.STRING,
@@ -307,7 +363,7 @@ class Scratch3RosBlocks {
                         OBJECT: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                             SLOT: {
                                 type: ArgumentType.STRING,
@@ -323,7 +379,7 @@ class Scratch3RosBlocks {
                         OBJECT: {
                             type: ArgumentType.STRING,
                             menu: 'variablesMenu',
-                            defaultValue: this._updateVariablesList()[0].text
+                            defaultValue: this._updateVariableList()[0].text
                         },
                         SLOT: {
                             type: ArgumentType.STRING,
@@ -335,7 +391,8 @@ class Scratch3RosBlocks {
             menus: {
                 topicsMenu: '_updateTopicList',
                 servicesMenu: '_updateServiceList',
-                variablesMenu: '_updateVariablesList'
+                variablesMenu: '_updateVariableList',
+                paramsMenu: '_updateParamList',
             }
         }
     }
