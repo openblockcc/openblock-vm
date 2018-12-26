@@ -16,7 +16,19 @@ const std_msgs_array = {
 
 class RosUtil extends ROSLIB.Ros {
     constructor(options) {
-        super(options)
+        super(options);
+
+        this.on('close', function() {
+            const msg = `
+            ** Error connecting to ROS!! **
+
+Make sure to enable connections with:
+    roslaunch rosbridge_server rosbridge_websocket.launch
+
+Click 'ok' to reconnect.`;
+
+            if (confirm(msg)) this.connect(options.url);
+        });
     };
 
     getMessageDetailsByTopic(topic) {
