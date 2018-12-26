@@ -38,10 +38,6 @@ class Scratch3RosBlocks {
         });
     };
 
-    printObject({OBJ}) {
-        alert(JSON.stringify(OBJ,null,2));
-    };
-
     subscribeTopic({TOPIC}) {
         var ROS = this.ros;
         return new Promise( function(resolve) {
@@ -54,14 +50,14 @@ class Scratch3RosBlocks {
     };
 
     publishTopic({MSG, TOPIC}, util) {
-        var msg = this._getVariableValue(MSG) || JSON.parse(MSG);
+        var msg = this._getVariableValue(MSG) || this._tryParse(MSG);
 
         this.ros.getTopic(TOPIC).then(
             rosTopic => rosTopic.publish(msg));
     };
 
     callService({REQUEST, SERVICE}, util) {
-        var req = this._getVariableValue(REQUEST) || JSON.parse(REQUEST);
+        var req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
 
         var ROS = this.ros;
         return new Promise( function(resolve) {
@@ -73,8 +69,22 @@ class Scratch3RosBlocks {
     };
 
     getSlot({OBJECT, SLOT}, util) {
-        var obj = this._getVariableValue(OBJECT) || JSON.parse(OBJECT);
-        var res = eval('obj' + '.' + SLOT);
+        const variable = util.target.lookupVariableByNameAndType(OBJECT);
+        var obj = variable && variable.value || this._tryParse(OBJECT);
+        var res = obj && eval('obj' + '.' + SLOT);
+        if (util.thread.updateMonitor) {
+            if (res) return JSON.stringify(res);
+            else {
+                var name = OBJECT + '.' + SLOT;
+                var id = variable ?
+                    variable.id + name :
+                    Object.keys(util.runtime.monitorBlocks._blocks).
+                    find(key => key.search(name) >= 0);
+
+                util.runtime.monitorBlocks.deleteBlock(id);
+                util.runtime.requestRemoveMonitor(id);
+            }
+        }
         if (typeof(res) === 'object')
             res.toString = function() { return JSON.stringify(this); }
         return res;
@@ -89,12 +99,6 @@ class Scratch3RosBlocks {
             obj = obj[slots[last]] = value;
         };
 
-        function tryParse(val) {
-            try {
-                return JSON.parse(val);
-            } catch(err) { return val; }
-        };
-
         const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return;
 
@@ -104,28 +108,53 @@ class Scratch3RosBlocks {
         else
             variable.value = {};
         var slt = SLOT.split('.');
-        if (Array.isArray(VALUE)) var val = VALUE.map(tryParse);
-        else var val = tryParse(VALUE);
+        var val = Array.isArray(VALUE) ?
+            VALUE.map(v => this._tryParse(v,v)) :
+            this._tryParse(VALUE, VALUE);
 
         setNestedValue(variable.value, slt, val);
 
         // TODO: cloud variables
     };
 
-    waitInterpolation() {
-        var ROS = this.ros;
-        return new Promise( function(resolve) {
-            ROS.getTopic('/move_group/result').then(
-                rosTopic =>
-                    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
-                                                resolve(); }));
-        });
-    };
+    showVariable(args) { this._changeVariableVisibility(args, true); };
+
+    hideVariable(args) { this._changeVariableVisibility(args, false); };
 
     _getVariableValue(name, type) {
         var target = this.runtime.getEditingTarget();
         var variable = target.lookupVariableByNameAndType(name, type);
         return variable && variable.value;
+    };
+
+    _tryParse(value, reject) {
+        try {
+            return JSON.parse(value);
+        } catch(err) { return reject; }
+    };
+
+    _changeVariableVisibility({OBJECT, SLOT}, visible) {
+        const target = this.runtime.getEditingTarget();
+        const variable = target.lookupVariableByNameAndType(OBJECT);
+        const id = variable && variable.id + OBJECT + '.' + SLOT;
+        if (!id) return;
+
+        if (visible && !(this.runtime.monitorBlocks._blocks[id])) {
+            var isLocal = !(this.runtime.getTargetForStage().variables[variable.id]);
+            var targetId = isLocal ? target.id : null;
+            this.runtime.monitorBlocks.createBlock(
+                {id: id,
+                 targetId: targetId,
+                 opcode: 'ros_getSlot',
+                 fields: {OBJECT: {value: OBJECT}, SLOT: {value: SLOT}}
+                });
+        }
+
+        this.runtime.monitorBlocks.changeBlock({
+            id: id,
+            element: 'checkbox',
+            value: visible
+        }, this.runtime);
     };
 
     _updateTopicList() {
@@ -237,17 +266,6 @@ class Scratch3RosBlocks {
                     }
                 },
                 {
-                    opcode: 'printObject',
-                    blockType: BlockType.COMMAND,
-                    text: 'Print [OBJ]',
-                    arguments: {
-                        OBJ: {
-                            type: ArgumentType.STRING,
-                            defaultValue: 'object'
-                        }
-                    }
-                },
-                {
                     opcode: 'getSlot',
                     blockType: BlockType.REPORTER,
                     text: 'Get [OBJECT] [SLOT]',
@@ -284,9 +302,36 @@ class Scratch3RosBlocks {
                     }
                 },
                 {
-                    opcode: 'waitInterpolation',
+                    opcode: 'showVariable',
                     blockType: BlockType.COMMAND,
-                    text: 'Wait interpolation',
+                    text: 'Show [OBJECT] [SLOT]',
+                    arguments: {
+                        OBJECT: {
+                            type: ArgumentType.STRING,
+                            menu: 'variablesMenu',
+                            defaultValue: this._updateVariablesList()[0].text
+                        },
+                            SLOT: {
+                                type: ArgumentType.STRING,
+                                defaultValue: 'data'
+                            },
+                    }
+                },
+                {
+                    opcode: 'hideVariable',
+                    blockType: BlockType.COMMAND,
+                    text: 'Hide [OBJECT] [SLOT]',
+                    arguments: {
+                        OBJECT: {
+                            type: ArgumentType.STRING,
+                            menu: 'variablesMenu',
+                            defaultValue: this._updateVariablesList()[0].text
+                        },
+                        SLOT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'data'
+                        },
+                    }
                 }
             ],
             menus: {

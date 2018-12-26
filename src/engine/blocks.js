@@ -611,7 +611,8 @@ class Blocks {
             // block but in the case of monitored reporters that have arguments,
             // map the old id to a new id, creating a new monitor block if necessary
             if (block.fields && Object.keys(block.fields).length > 0 &&
-                block.opcode !== 'data_variable' && block.opcode !== 'data_listcontents') {
+                block.opcode !== 'data_variable' && block.opcode !== 'data_listcontents' &&
+                block.opcode !== 'ros_getSlot') {
 
                 // This block has an argument which needs to get separated out into
                 // multiple monitor blocks with ids based on the selected argument
@@ -649,8 +650,6 @@ class Blocks {
                 // the current editing one b/c you cannot dynamically create monitors.
                 // Also, do not change the targetId if it has already been assigned
                 block.targetId = block.targetId || this.runtime.getEditingTarget().id;
-            } else {
-                block.targetId = null;
             }
 
             if (wasMonitored && !block.isMonitored) {
