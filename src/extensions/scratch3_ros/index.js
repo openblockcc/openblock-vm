@@ -11,9 +11,9 @@ class Scratch3RosBlocks {
     constructor(runtime) {
         // Can only establish safe connections to localhost when running from github.io
         this.ros = new RosUtil({ url : 'ws://localhost:9090' });
-        this.topicNames = ['topic'];
-        this.serviceNames = ['service'];
-        this.paramNames = ['param'];
+        this.topicNames = ['/topic'];
+        this.serviceNames = ['/service'];
+        this.paramNames = ['/param'];
         this.runtime = runtime;
     };
 
@@ -49,14 +49,28 @@ class Scratch3RosBlocks {
     };
 
     publishTopic({MSG, TOPIC}, util) {
-        var msg = this._getVariableValue(MSG) || this._tryParse(MSG);
+        var msg = this._tryParse(MSG) || this._getVariableValue(MSG);
+        if (!this._isJSON(msg)) msg = {data: msg};
+        var ros = this.ros;
 
-        this.ros.getTopic(TOPIC).then(
-            rosTopic => rosTopic.publish(msg));
+        ros.getTopic(TOPIC).then( function(rosTopic) {
+            let keys = Object.keys(msg);
+            if (!rosTopic.messageType) {
+                if (!(keys.length == 1 && keys[0] === 'data'))
+                    msg = {data: JSON.stringify(msg)};
+                rosTopic.messageType = ros.getRosType(msg.data);
+            }
+            else {
+                if (!(keys.length == 1 && keys[0] === 'data' &&
+                      rosTopic.messageType === ros.getRosType(msg.data)))
+                    msg = {data: JSON.stringify(msg)};
+            }
+            rosTopic.publish(msg);
+        });
     };
 
     callService({REQUEST, SERVICE}, util) {
-        var req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
+        var req =  this._tryParse(REQUEST) || this._getVariableValue(REQUEST);
 
         var ROS = this.ros;
         return new Promise( function(resolve) {
@@ -77,7 +91,7 @@ class Scratch3RosBlocks {
         return new Promise( function(resolve) {
             const param = ROS.getParam(NAME);
             param.get( function(val) {
-                if (typeof(val) === 'object')
+                if (this._isJSON(val))
                     val.toString = function() { return JSON.stringify(this); }
                 resolve(val);
             });
@@ -87,9 +101,9 @@ class Scratch3RosBlocks {
     getSlot({OBJECT, SLOT}, util) {
         const variable = util.target.lookupVariableByNameAndType(OBJECT);
         var obj = variable && variable.value || this._tryParse(OBJECT);
-        var res = obj && eval('obj' + '.' + SLOT);
+        var res = this._isJSON(obj) && eval('obj' + '.' + SLOT);
         if (util.thread.updateMonitor) {
-            if (res) return JSON.stringify(res);
+            if (res !== undefined) return JSON.stringify(res);
             else {
                 var name = OBJECT + '.' + SLOT;
                 var id = variable ?
@@ -101,7 +115,7 @@ class Scratch3RosBlocks {
                 util.runtime.requestRemoveMonitor(id);
             }
         }
-        if (typeof(res) === 'object')
+        if (this._isJSON(res))
             res.toString = function() { return JSON.stringify(this); }
         return res;
     };
@@ -118,7 +132,7 @@ class Scratch3RosBlocks {
         const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return;
 
-        if (typeof(variable.value) === 'object')
+        if (this._isJSON(variable.value))
             // Clone object to avoid overwriting parent variables
             variable.value = JSON.parse(JSON.stringify(variable.value));
         else
@@ -137,16 +151,20 @@ class Scratch3RosBlocks {
 
     hideVariable(args) { this._changeVariableVisibility(args, false); };
 
-    _getVariableValue(name, type) {
-        var target = this.runtime.getEditingTarget();
-        var variable = target.lookupVariableByNameAndType(name, type);
-        return variable && variable.value;
+    _isJSON(value) {
+        return typeof(value) === 'object' && value.constructor === Object;
     };
 
     _tryParse(value, reject) {
         try {
             return JSON.parse(value);
         } catch(err) { return reject; }
+    };
+
+    _getVariableValue(name, type) {
+        var target = this.runtime.getEditingTarget();
+        var variable = target.lookupVariableByNameAndType(name, type);
+        return variable && this._tryParse(variable.value, variable.value);
     };
 
     _changeVariableVisibility({OBJECT, SLOT}, visible) {

@@ -84,6 +84,17 @@ Click 'ok' to reconnect.`;
         });
     };
 
+    getRosType(val) {
+        switch (typeof val) {
+        case 'boolean':
+            return 'std_msgs/Bool';
+        case 'number':
+            return (val % 1 == 0) ? 'std_msgs/Int32' : 'std_msgs/Float64';
+        default:
+            return 'std_msgs/String';
+        }
+    };
+
     messageExample(obj, list) {
         var result = {};
         for (var i=0, len = obj.fieldnames.length; i<len; i++) {
