@@ -38,18 +38,23 @@ class Scratch3RosBlocks {
     };
 
     subscribeTopic({TOPIC}) {
-        var ROS = this.ros;
+        var that = this;
         return new Promise( function(resolve) {
-            ROS.getTopic(TOPIC).then(
+            that.ros.getTopic(TOPIC).then(
                 rosTopic =>
-                    rosTopic.subscribe(msg => { rosTopic.unsubscribe();
-                                                msg.toString = function() { return JSON.stringify(this); }
-                                                resolve(msg); }));
+                    rosTopic.subscribe(function(msg) {
+                        rosTopic.unsubscribe();
+                        if (rosTopic.messageType === 'std_msgs/String')
+                            msg.data = that._tryParse(msg.data);
+                        msg.toString = function() { return JSON.stringify(this); }
+                        msg.constructor = Object;
+                        resolve(msg); }));
         });
     };
 
     publishTopic({MSG, TOPIC}, util) {
-        var msg = this._tryParse(MSG) || this._getVariableValue(MSG);
+        var msg = this._getVariableValue(MSG);
+        if (msg === undefined || msg === null) msg = this._tryParse(MSG);
         if (!this._isJSON(msg)) msg = {data: msg};
         var ros = this.ros;
 
@@ -61,8 +66,8 @@ class Scratch3RosBlocks {
                 rosTopic.messageType = ros.getRosType(msg.data);
             }
             else {
-                if (!(keys.length == 1 && keys[0] === 'data' &&
-                      rosTopic.messageType === ros.getRosType(msg.data)))
+                if (rosTopic.messageType === 'std_msgs/String' &&
+                    !(keys.length == 1 && keys[0] === 'data'))
                     msg = {data: JSON.stringify(msg)};
             }
             rosTopic.publish(msg);
@@ -70,7 +75,7 @@ class Scratch3RosBlocks {
     };
 
     callService({REQUEST, SERVICE}, util) {
-        var req =  this._tryParse(REQUEST) || this._getVariableValue(REQUEST);
+        var req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
 
         var ROS = this.ros;
         return new Promise( function(resolve) {
@@ -100,8 +105,8 @@ class Scratch3RosBlocks {
 
     getSlot({OBJECT, SLOT}, util) {
         const variable = util.target.lookupVariableByNameAndType(OBJECT);
-        var obj = variable && variable.value || this._tryParse(OBJECT);
-        var res = this._isJSON(obj) && eval('obj' + '.' + SLOT);
+        var obj = this._getVariableValue(variable) || this._tryParse(OBJECT);
+        var res = (this._isJSON(obj) || undefined) && eval('obj' + '.' + SLOT);
         if (util.thread.updateMonitor) {
             if (res !== undefined) return JSON.stringify(res);
             else {
@@ -131,10 +136,11 @@ class Scratch3RosBlocks {
 
         const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return;
+        var value = this._getVariableValue(variable);
 
-        if (this._isJSON(variable.value))
+        if (this._isJSON(value))
             // Clone object to avoid overwriting parent variables
-            variable.value = JSON.parse(JSON.stringify(variable.value));
+            variable.value = JSON.parse(JSON.stringify(value));
         else
             variable.value = {};
         var slt = SLOT.split('.');
@@ -152,18 +158,19 @@ class Scratch3RosBlocks {
     hideVariable(args) { this._changeVariableVisibility(args, false); };
 
     _isJSON(value) {
-        return typeof(value) === 'object' && value.constructor === Object;
+        return value && typeof(value) === 'object' && value.constructor === Object;
     };
 
     _tryParse(value, reject) {
+        if (typeof value !== 'string') return value;
         try {
             return JSON.parse(value);
         } catch(err) { return reject; }
     };
 
-    _getVariableValue(name, type) {
-        var target = this.runtime.getEditingTarget();
-        var variable = target.lookupVariableByNameAndType(name, type);
+    _getVariableValue(variable, type) {
+        if (typeof variable === 'string')
+            variable = this.runtime.getEditingTarget().lookupVariableByNameAndType(variable, type);
         return variable && this._tryParse(variable.value, variable.value);
     };
 
