@@ -9,32 +9,12 @@ const icon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34
 class Scratch3RosBlocks {
 
     constructor(runtime) {
-        // Can only establish safe connections to localhost when running from github.io
+        // When running from github.io, only connections to localhost can be safely established
         this.ros = new RosUtil({ url : 'ws://localhost:9090' });
         this.topicNames = ['/topic'];
         this.serviceNames = ['/service'];
         this.paramNames = ['/param'];
         this.runtime = runtime;
-    };
-
-    makeMessage({TOPIC}) {
-        var ROS = this.ros;
-        return new Promise( function(resolve) {
-            ROS.getMessageDetailsByTopic(TOPIC).then( function(result) {
-                var example = ROS.messageExample(result[0], result);
-                example.toString = function() { return JSON.stringify(this); }
-                resolve(example); });
-        });
-    };
-
-    makeRequest({SERVICE}) {
-        var ROS = this.ros;
-        return new Promise( function(resolve) {
-            ROS.getRequestDetailsByService(SERVICE).then( function(result) {
-                var example = ROS.messageExample(result[0], result);
-                example.toString = function() { return JSON.stringify(this); }
-                resolve(example); });
-        });
     };
 
     subscribeTopic({TOPIC}) {
@@ -259,18 +239,6 @@ class Scratch3RosBlocks {
                     }
                 },
                 {
-                    opcode: 'makeMessage',
-                    blockType: BlockType.REPORTER,
-                    text: 'Create message for [TOPIC]',
-                    arguments: {
-                        TOPIC: {
-                            type: ArgumentType.STRING,
-                            menu: 'topicsMenu',
-                            defaultValue: this.topicNames[0]
-                        }
-                    }
-                },
-                {
                     opcode: 'publishTopic',
                     blockType: BlockType.COMMAND,
                     text: 'Publish [MSG] to [TOPIC]',
@@ -288,18 +256,6 @@ class Scratch3RosBlocks {
                     }
                 },
                 '---',
-                {
-                    opcode: 'makeRequest',
-                    blockType: BlockType.REPORTER,
-                    text: 'Create request for [SERVICE]',
-                    arguments: {
-                        SERVICE: {
-                            type: ArgumentType.STRING,
-                            menu: 'servicesMenu',
-                            defaultValue: this.serviceNames[0]
-                        }
-                    }
-                },
                 {
                     opcode: 'callService',
                     blockType: BlockType.REPORTER,
