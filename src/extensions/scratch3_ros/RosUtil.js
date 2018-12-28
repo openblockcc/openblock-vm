@@ -50,6 +50,7 @@ Click 'ok' to reconnect.`;
     };
 
     getTopic(name) {
+        if (name && !name.startsWith('/')) name = '/' + name;
         var ros = this;
         return new Promise( function(resolve,reject) {
             ros.getTopicType(

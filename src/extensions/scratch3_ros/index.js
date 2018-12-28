@@ -41,24 +41,27 @@ class Scratch3RosBlocks {
         var that = this;
         return new Promise( function(resolve) {
             that.ros.getTopic(TOPIC).then(
-                rosTopic =>
+                rosTopic => {
+                    if (!rosTopic.messageType) resolve();
                     rosTopic.subscribe(function(msg) {
-                        rosTopic.unsubscribe();
+                        // rosTopic.unsubscribe();
                         if (rosTopic.messageType === 'std_msgs/String')
                             msg.data = that._tryParse(msg.data);
                         msg.toString = function() { return JSON.stringify(this); }
                         msg.constructor = Object;
-                        resolve(msg); }));
+                        resolve(msg); });
+                });
         });
     };
 
-    publishTopic({MSG, TOPIC}, util) {
+    publishTopic({MSG, TOPIC}) {
         var msg = this._getVariableValue(MSG);
         if (msg === undefined || msg === null) msg = this._tryParse(MSG);
         if (!this._isJSON(msg)) msg = {data: msg};
         var ros = this.ros;
 
         ros.getTopic(TOPIC).then( function(rosTopic) {
+            if (!rosTopic.name) return;
             let keys = Object.keys(msg);
             if (!rosTopic.messageType) {
                 if (!(keys.length == 1 && keys[0] === 'data'))
@@ -74,7 +77,7 @@ class Scratch3RosBlocks {
         });
     };
 
-    callService({REQUEST, SERVICE}, util) {
+    callService({REQUEST, SERVICE}) {
         var req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
 
         var ROS = this.ros;
@@ -92,11 +95,11 @@ class Scratch3RosBlocks {
     };
 
     getParamValue({NAME}) {
-        var ROS = this.ros;
+        var that = this;
         return new Promise( function(resolve) {
-            const param = ROS.getParam(NAME);
+            const param = that.ros.getParam(NAME);
             param.get( function(val) {
-                if (this._isJSON(val))
+                if (that._isJSON(val))
                     val.toString = function() { return JSON.stringify(this); }
                 resolve(val);
             });
