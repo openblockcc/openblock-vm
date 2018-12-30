@@ -314,14 +314,6 @@ class Thread {
     }
 
     /**
-     * Push a reported value to the parent of the current stack frame.
-     * @param {*} value Reported value to push.
-     */
-    pushReportedValue (value) {
-        this.justReported = typeof value === 'undefined' ? null : value;
-    }
-
-    /**
      * Initialize procedure parameters on this stack frame.
      */
     initParams () {

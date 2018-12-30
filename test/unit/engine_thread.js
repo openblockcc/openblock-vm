@@ -17,7 +17,6 @@ test('spec', t => {
     t.type(th.peekStack, 'function');
     t.type(th.peekStackFrame, 'function');
     t.type(th.peekParentStackFrame, 'function');
-    t.type(th.pushReportedValue, 'function');
     t.type(th.initParams, 'function');
     t.type(th.pushParam, 'function');
     t.type(th.peekStack, 'function');

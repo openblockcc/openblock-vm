@@ -151,12 +151,14 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         const req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
 
         return new Promise(resolve => {
-            ROS.getService(SERVICE).then(rosService =>
+            ROS.getService(SERVICE).then(rosService => {
+                if (!rosService.serviceType) resolve();
                 rosService.callService(req,
                     res => {
                         rosService.unadvertise();
                         resolve(res);
-                    }));
+                    });
+            });
         });
     }
 
@@ -165,6 +167,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         return new Promise(resolve => {
             const param = that.ros.getParam(NAME);
             param.get(val => {
+                if (val === null) resolve();
                 if (that._isJSON(val)) {
                     val.toString = function () { return JSON.stringify(this); };
                 }

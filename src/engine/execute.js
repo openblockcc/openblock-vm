@@ -55,7 +55,7 @@ const handleReport = function (resolvedValue, sequencer, thread, blockCached, la
     const opcode = blockCached.opcode;
     const isHat = blockCached._isHat;
 
-    thread.pushReportedValue(resolvedValue);
+    thread.justReported = resolvedValue;
     if (isHat) {
         // Hat predicate was evaluated.
         if (sequencer.runtime.getIsEdgeActivatedHat(opcode)) {
