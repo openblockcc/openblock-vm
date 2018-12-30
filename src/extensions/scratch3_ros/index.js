@@ -1,3 +1,4 @@
+const math = require('mathjs');
 const JSON = require('circular-json');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
@@ -241,6 +242,19 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         this._changeVariableVisibility(args, false);
     }
 
+    solveFormula ({EXP, OBJ}) {
+        let binds = this._getVariableValue(OBJ) || this._tryParse(OBJ);
+        binds = JSON.parse(JSON.stringify(binds));
+        delete binds.toString;
+        delete binds.constructor;
+        try {
+            if (this._isJSON(binds)) return math.eval(EXP, binds);
+            return math.eval(EXP);
+        } catch (err) {
+            return;
+        }
+    }
+
     getInfo () {
         const stringArg = defValue => ({
             type: ArgumentType.STRING,
@@ -359,6 +373,16 @@ class Scratch3RosBlocks extends Scratch3RosBase {
                     arguments: {
                         VAR: variableArg,
                         SLOT: stringArg('data')
+                    }
+                },
+                '---',
+                {
+                    opcode: 'solveFormula',
+                    blockType: BlockType.REPORTER,
+                    text: '[EXP] binding [OBJ]',
+                    arguments: {
+                        EXP: stringArg('(data + 1) ^ 2'),
+                        OBJ: variableArg
                     }
                 }
             ],
