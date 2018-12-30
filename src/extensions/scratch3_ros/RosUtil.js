@@ -1,19 +1,32 @@
 const ROSLIB = require('roslib');
 
 class RosUtil extends ROSLIB.Ros {
-    constructor (options) {
+    constructor (runtime, extensionId, options) {
         super(options);
 
-        this.on('close', function () {
-            const msg = `
-            ** Error connecting to ROS!! **
+        this.runtime = runtime;
+        this.extensionId = extensionId;
+        this.everConnected = false;
 
-Make sure to enable connections with:
-    roslaunch rosbridge_server rosbridge_websocket.launch
+        this.on('connection', () => {
+            this.everConnected = true;
+            this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTED);
+        });
 
-Click 'ok' to reconnect.`;
+        this.on('close', () => {
+            if (this.everConnected) {
+                this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECT_ERROR, {
+                    message: `Scratch lost connection to`,
+                    extensionId: this.extensionId
+                });
+            }
+        });
 
-            if (confirm(msg)) this.connect(options.url);
+        this.on('error', () => {
+            this.runtime.emit(this.runtime.constructor.PERIPHERAL_REQUEST_ERROR, {
+                message: `Scratch lost connection to`,
+                extensionId: this.extensionId
+            });
         });
     }
 
