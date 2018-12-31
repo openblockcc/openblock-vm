@@ -285,13 +285,19 @@ class Scratch3RosBlocks extends Scratch3RosBase {
     }
 
     solveFormula ({EXP, OBJ}) {
-        let binds = this._getVariableValue(OBJ) || this._tryParse(OBJ);
-        binds = JSON.parse(JSON.stringify(binds));
-        delete binds.toString;
-        delete binds.constructor;
+        const obj = this._getVariableValue(OBJ) || this._tryParse(OBJ);
+        let binds;
+        if (this._isJSON(obj)) {
+            binds = JSON.parse(JSON.stringify(obj));
+            delete binds.toString;
+            delete binds.constructor;
+        } else {
+            binds = {};
+            binds[OBJ] = obj;
+        }
+
         try {
-            if (this._isJSON(binds)) return math.eval(EXP, binds);
-            return math.eval(EXP);
+            return math.eval(EXP, binds);
         } catch (err) {
             return;
         }
