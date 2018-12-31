@@ -151,7 +151,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
                     rosTopic.subscribe(msg => {
                         // rosTopic.unsubscribe();
                         if (rosTopic.messageType === 'std_msgs/String') {
-                            msg.data = that._tryParse(msg.data);
+                            msg.data = that._tryParse(msg.data, msg.data);
                         }
                         msg.toString = function () { return JSON.stringify(this); };
                         msg.constructor = Object;
