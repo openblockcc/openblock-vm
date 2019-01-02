@@ -22,6 +22,7 @@
   - *TOPIC*: An existing ROS topic pick from the dropdown list or a string naming a new topic
 - *Fail cases*: When MSG type does not match the message type of TOPIC
 - *Notes*:
+  - Use inside a `forever` loop with `wait` to publish constantly (however, publishing rates are limited and tend to be unstable)
   - If TOPIC is not advertised, it is newly advertised according to the following:
     - std_msgs/Int32, if MSG is an integer or a `{data: INTEGER}` like object
     - std_msgs/Float64, if MSG is a float or a `{data: FLOAT}` like object
@@ -123,4 +124,4 @@
 - *Fail cases*: When EXPRESSION is an invalid mathematics expression; When OBJECT contains keys with invalid name (including spaces, numbers etc)
 - *Notes*:
   - Any function provided by [mathjs](http://mathjs.org/docs/reference/functions.html) can be used
-  - Evaluation success can be verified with `if <solve> = undefined`
+  - Evaluation failure can be verified with `if <solve> = undefined`

@@ -22,6 +22,8 @@ class Scratch3RosBase {
 
         this.runtime.registerPeripheralExtension(this.extensionId, this);
 
+        math.config({matrix: 'Array'});
+
         this.topicNames = ['/topic'];
         this.serviceNames = ['/service'];
         this.paramNames = ['/param'];
@@ -217,7 +219,10 @@ class Scratch3RosBlocks extends Scratch3RosBase {
 
     setParamValue ({NAME, VALUE}) {
         const param = this.ros.getParam(NAME);
-        param.set(this._tryParse(VALUE, VALUE));
+        const val = Array.isArray(VALUE) ?
+            VALUE.map(v => this._tryParse(v, v)) :
+            this._tryParse(VALUE, VALUE);
+        param.set(val);
     }
 
     getSlot ({OBJECT, SLOT}, util) {
@@ -253,9 +258,13 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         const setNestedValue = function (obj, slots, value) {
             const last = slots.length - 1;
             for (let i = 0; i < last; i++) {
-                obj = obj[ slots[i] ] = obj[ slots[i] ] || {};
+                const slot = slots[i];
+                if (!obj.hasOwnProperty(slot) || typeof obj[slot] !== 'object') {
+                    obj[slot] = isNaN(parseInt([slots[i + 1]])) ? {} : [];
+                }
+                obj = obj[slot];
             }
-            obj = obj[slots[last]] = value;
+            obj[slots[last]] = value;
         };
 
         const variable = util.target.lookupVariableByNameAndType(VAR);
@@ -266,7 +275,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
             // Clone object to avoid overwriting parent variables
             variable.value = JSON.parse(JSON.stringify(variableValue));
         } else variable.value = {};
-        const slt = SLOT.split('.');
+        const slt = SLOT.split(/\.|\[|\]/).filter(Boolean);
         const val = Array.isArray(VALUE) ?
             VALUE.map(v => this._tryParse(v, v)) :
             this._tryParse(VALUE, VALUE);
@@ -297,7 +306,9 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         }
 
         try {
-            return math.eval(EXPRESSION, binds);
+            const result = math.eval(EXPRESSION, binds);
+            if (math.typeof(result) === 'Unit') return result.toNumber();
+            return result;
         } catch (err) {
             return;
         }
