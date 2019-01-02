@@ -249,7 +249,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         return res;
     }
 
-    setSlot ({OBJECT, SLOT, VALUE}, util) {
+    setSlot ({VAR, SLOT, VALUE}, util) {
         const setNestedValue = function (obj, slots, value) {
             const last = slots.length - 1;
             for (let i = 0; i < last; i++) {
@@ -258,7 +258,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
             obj = obj[slots[last]] = value;
         };
 
-        const variable = util.target.lookupVariableByNameAndType(OBJECT);
+        const variable = util.target.lookupVariableByNameAndType(VAR);
         if (!variable) return;
         const variableValue = this._getVariableValue(variable);
 
@@ -284,8 +284,8 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         this._changeVariableVisibility(args, false);
     }
 
-    solveFormula ({EXP, OBJ}) {
-        const obj = this._getVariableValue(OBJ) || this._tryParse(OBJ);
+    solveFormula ({EXPRESSION, OBJECT}) {
+        const obj = this._getVariableValue(OBJECT) || this._tryParse(OBJECT);
         let binds;
         if (this._isJSON(obj)) {
             binds = JSON.parse(JSON.stringify(obj));
@@ -293,11 +293,11 @@ class Scratch3RosBlocks extends Scratch3RosBase {
             delete binds.constructor;
         } else {
             binds = {};
-            binds[OBJ] = obj;
+            binds[OBJECT] = obj;
         }
 
         try {
-            return math.eval(EXP, binds);
+            return math.eval(EXPRESSION, binds);
         } catch (err) {
             return;
         }
@@ -399,9 +399,9 @@ class Scratch3RosBlocks extends Scratch3RosBase {
                 {
                     opcode: 'setSlot',
                     blockType: BlockType.COMMAND,
-                    text: 'Set [OBJECT] [SLOT] to [VALUE]',
+                    text: 'Set [VAR] [SLOT] to [VALUE]',
                     arguments: {
-                        OBJECT: variableArg,
+                        VAR: variableArg,
                         SLOT: stringArg('data'),
                         VALUE: stringArg('Hello!')
                     }
@@ -428,10 +428,10 @@ class Scratch3RosBlocks extends Scratch3RosBase {
                 {
                     opcode: 'solveFormula',
                     blockType: BlockType.REPORTER,
-                    text: '[EXP] binding [OBJ]',
+                    text: '[EXPRESSION] binding [OBJECT]',
                     arguments: {
-                        EXP: stringArg('(data + 1) ^ 2'),
-                        OBJ: variableArg
+                        EXPRESSION: stringArg('(data + 1) ^ 2'),
+                        OBJECT: variableArg
                     }
                 }
             ],
