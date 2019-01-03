@@ -1,5 +1,7 @@
 # ROS Extension for Scratch 3
 
+![animation](https://user-images.githubusercontent.com/20625381/50626217-58147400-0f70-11e9-81ae-71d00fd18982.gif)
+
 An extension to connect [Scratch 3](https://en.scratch-wiki.info/wiki/Scratch_3.0) to [ROS](http://wiki.ros.org/) enabled platforms!
 
 Supports:
