@@ -17,7 +17,7 @@ class RosUtil extends ROSLIB.Ros {
 
         this.on('close', () => {
             if (this.everConnected) {
-                this.runtime.emit(this.runtime.constructor.PERIPHERAL_DISCONNECT_ERROR, {
+                this.runtime.emit(this.runtime.constructor.PERIPHERAL_CONNECTION_LOST_ERROR, {
                     message: `Scratch lost connection to`,
                     extensionId: this.extensionId
                 });
