@@ -151,6 +151,11 @@ class VirtualMachine extends EventEmitter {
 
         this.extensionManager = new ExtensionManager(this.runtime);
 
+        // Load core extensions
+        for (const id of CORE_EXTENSIONS) {
+            this.extensionManager.loadExtensionIdSync(id);
+        }
+
         this.blockListener = this.blockListener.bind(this);
         this.flyoutBlockListener = this.flyoutBlockListener.bind(this);
         this.monitorBlockListener = this.monitorBlockListener.bind(this);
@@ -492,14 +497,6 @@ class VirtualMachine extends EventEmitter {
      */
     installTargets (targets, extensions, wholeProject) {
         const extensionPromises = [];
-
-        if (wholeProject) {
-            CORE_EXTENSIONS.forEach(extensionID => {
-                if (!this.extensionManager.isExtensionLoaded(extensionID)) {
-                    extensionPromises.push(this.extensionManager.loadExtensionURL(extensionID));
-                }
-            });
-        }
 
         extensions.extensionIDs.forEach(extensionID => {
             if (!this.extensionManager.isExtensionLoaded(extensionID)) {
@@ -862,10 +859,13 @@ class VirtualMachine extends EventEmitter {
         costume.rotationCenterX = rotationCenterX;
         costume.rotationCenterY = rotationCenterY;
 
+        // If the bitmap originally had a zero width or height, use that value
+        const bitmapWidth = bitmap.sourceWidth === 0 ? 0 : bitmap.width;
+        const bitmapHeight = bitmap.sourceHeight === 0 ? 0 : bitmap.height;
         // @todo: updateBitmapSkin does not take ImageData
         const canvas = document.createElement('canvas');
-        canvas.width = bitmap.width;
-        canvas.height = bitmap.height;
+        canvas.width = bitmapWidth;
+        canvas.height = bitmapHeight;
         const context = canvas.getContext('2d');
         context.putImageData(bitmap, 0, 0);
 
@@ -885,7 +885,7 @@ class VirtualMachine extends EventEmitter {
                 const storage = this.runtime.storage;
                 costume.dataFormat = storage.DataFormat.PNG;
                 costume.bitmapResolution = bitmapResolution;
-                costume.size = [bitmap.width, bitmap.height];
+                costume.size = [bitmapWidth, bitmapHeight];
                 costume.asset = storage.createAsset(
                     storage.AssetType.ImageBitmap,
                     costume.dataFormat,
@@ -897,7 +897,10 @@ class VirtualMachine extends EventEmitter {
                 costume.md5 = `${costume.assetId}.${costume.dataFormat}`;
                 this.emitTargetsUpdate();
             });
-            reader.readAsArrayBuffer(blob);
+            // Bitmaps with a zero width or height return null for their blob
+            if (blob){
+                reader.readAsArrayBuffer(blob);
+            }
         });
     }
 
