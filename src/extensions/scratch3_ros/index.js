@@ -12,6 +12,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         super('ROS', 'ros', runtime);
     }
 
+    // customize to handle topics advertised from Scratch
     subscribeTopic ({TOPIC}) {
         const that = this;
         return new Promise(resolve => {
@@ -31,6 +32,7 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         });
     }
 
+    // customize to handle unadvertised topics
     publishTopic ({MSG, TOPIC}) {
         const ROS = this.ros;
         let msg = this._getVariableValue(MSG);
@@ -56,19 +58,8 @@ class Scratch3RosBlocks extends Scratch3RosBase {
     }
 
     callService ({REQUEST, SERVICE}) {
-        const ROS = this.ros;
         const req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
-
-        return new Promise(resolve => {
-            ROS.getService(SERVICE).then(rosService => {
-                if (!rosService.serviceType) resolve();
-                rosService.callService(req,
-                    res => {
-                        rosService.unadvertise();
-                        resolve(res);
-                    });
-            });
-        });
+        return this.ros.callService(SERVICE, req);
     }
 
     getParamValue ({NAME}) {

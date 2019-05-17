@@ -68,6 +68,41 @@ class RosUtil extends ROSLIB.Ros {
         });
     }
 
+    publishTopic (name, msg) {
+        return new Promise(resolve => {
+            this.getTopic(name).then(rosTopic => {
+                if (!rosTopic.messageType) resolve();
+                rosTopic.publish(msg);
+                resolve(true)
+            });
+        });
+    }
+
+    subscribeTopic (name, callback, unsubscribe=true) {
+        return new Promise(resolve => {
+            this.getTopic(name).then(rosTopic => {
+                if (!rosTopic.messageType) resolve();
+                rosTopic.subscribe(msg => {
+                    if (unsubscribe) rosTopic.unsubscribe();
+                    resolve(callback(msg));
+                });
+            });
+        });
+    }
+
+    callService (name, req) {
+        return new Promise(resolve => {
+            this.getService(name).then(rosService => {
+                if (!rosService.serviceType) resolve();
+                rosService.callService(req,
+                    res => {
+                        rosService.unadvertise();
+                        resolve(res);
+                    });
+            });
+        });
+    }
+
     getRosType (val) {
         switch (typeof val) {
         case 'boolean':
