@@ -133,10 +133,8 @@ class Scratch3RosBase {
 
     // Peripheral connection functions
     scan () {
-        // Not going to really 'scan' anything
-        // When running from github.io, only connections to localhost can be safely established
-        // Otherwise we need to use WebSocketSecure or host our own http site
-        this.connect('ws://localhost:9090');
+        this.masterURI = prompt('Master URI:')
+        this.connect('ws://' + this.masterURI + ':9090');
     }
 
     connect (url) {
