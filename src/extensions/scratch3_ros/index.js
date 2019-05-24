@@ -33,9 +33,9 @@ class Scratch3RosBlocks extends Scratch3RosBase {
     }
 
     // customize to handle unadvertised topics
-    publishTopic ({MSG, TOPIC}) {
+    publishTopic ({MSG, TOPIC}, util) {
         const ROS = this.ros;
-        let msg = this._getVariableValue(MSG);
+        let msg = this._getVariableValue(MSG, util.target);
         if (msg === null || typeof msg === 'undefined') msg = this._tryParse(MSG);
         if (!this._isJSON(msg)) msg = {data: msg};
 
@@ -57,8 +57,8 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         });
     }
 
-    callService ({REQUEST, SERVICE}) {
-        const req = this._getVariableValue(REQUEST) || this._tryParse(REQUEST);
+    callService ({REQUEST, SERVICE}, util) {
+        const req = this._getVariableValue(REQUEST, util.target) || this._tryParse(REQUEST);
         return this.ros.callService(SERVICE, req);
     }
 
@@ -152,8 +152,8 @@ class Scratch3RosBlocks extends Scratch3RosBase {
         this._changeVariableVisibility(args, false);
     }
 
-    solveFormula ({EXPRESSION, OBJECT}) {
-        const obj = this._getVariableValue(OBJECT) || this._tryParse(OBJECT);
+    solveFormula ({EXPRESSION, OBJECT}, util) {
+        const obj = this._getVariableValue(OBJECT, util.target) || this._tryParse(OBJECT);
         let binds;
         if (this._isJSON(obj)) {
             binds = JSON.parse(JSON.stringify(obj));

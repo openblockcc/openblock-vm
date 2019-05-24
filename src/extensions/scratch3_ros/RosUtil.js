@@ -167,9 +167,19 @@ class Scratch3RosBase {
     }
 
     // Variable utility
-    _getVariableValue (variable, type) {
+    _getVariableValue (variable, target, type) {
         if (typeof variable === 'string') {
-            variable = this.runtime.getEditingTarget().lookupVariableByNameAndType(variable, type);
+            if (target) variable = target.lookupVariableByNameAndType(variable, type);
+            else {
+                let tmp;
+                for (const target of this.runtime.targets) {
+                    tmp = target.lookupVariableByNameAndType(variable, type);
+                    if (tmp) {
+                        variable = tmp;
+                        break;
+                    }
+                }
+            }
         }
         return variable && this._tryParse(variable.value, variable.value);
     }
