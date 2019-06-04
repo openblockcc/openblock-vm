@@ -1,122 +1,65 @@
-## scratch-vm
-#### Scratch VM is a library for representing, running, and maintaining the state of computer programs written using [Scratch Blocks](https://github.com/LLK/scratch-blocks).
+# ROS Extension for Scratch 3
 
-[![Build Status](https://travis-ci.org/LLK/scratch-vm.svg?branch=develop)](https://travis-ci.org/LLK/scratch-vm)
-[![Coverage Status](https://coveralls.io/repos/github/LLK/scratch-vm/badge.svg?branch=develop)](https://coveralls.io/github/LLK/scratch-vm?branch=develop)
-[![Greenkeeper badge](https://badges.greenkeeper.io/LLK/scratch-vm.svg)](https://greenkeeper.io/)
+![animation](https://user-images.githubusercontent.com/20625381/50626217-58147400-0f70-11e9-81ae-71d00fd18982.gif)
 
-## Installation
-This requires you to have Git and Node.js installed.
+An extension to connect [Scratch 3](https://en.scratch-wiki.info/wiki/Scratch_3.0) to [ROS](http://wiki.ros.org/) enabled platforms!
 
-To install as a dependency for your own application:
+Supports:
+- publishing and subscribing topics
+- calling services
+- getting and setting rosparam variables
+
+## About
+
+This extension packs with utility blocks for creating and manipulating [JSON objects](https://www.w3schools.com/js/js_json_objects.asp), which are integrated to Scratch variables and used to represent ROS messages.
+
+When communicating with the ROS interface, message types are mostly infered by the topic or service name, being occluded from the user. This way the user do not need to worry that much about types, allowing easier and more intuitive usage of this extension.
+
+This also means, however, that this extension doesn't do well in advertising new topics or serving services. Maybe these will be supported in future releases, but for now Scratch interface is designed to act as a ROS **client**, publishing to topics and called nodes already advertised by some other node, which should be responsible to handle the message from Scratch and do all of the robotics stuff.
+
+## Quick Start
+0. [Install ROS](http://wiki.ros.org/ROS/Installation) and the following dependencies. This project was tested on ROS kinetic, but should run well in other distributions as well.
 ```bash
-npm install scratch-vm
-```
-To set up a development environment to edit scratch-vm yourself:
-```bash
-git clone https://github.com/LLK/scratch-vm.git
-cd scratch-vm
-npm install
+# Install main dependencies
+sudo apt install ros-kinetic-rosbridge-server
+# Install examples dependencies
+sudo apt install ros-kinetic-turtlesim ros-kinetic-actionlib-tutorials 
 ```
 
-## Development Server
-This requires Node.js to be installed.
+1. Access http://scratch3-ros.jsk.imi.i.u-tokyo.ac.jp
 
-For convenience, we've included a development server with the VM. This is sometimes useful when running in an environment that's loading remote resources (e.g., SVGs from the Scratch server). If you would like to use your modified VM with the full Scratch 3.0 GUI, [follow the instructions to link the VM to the GUI](https://github.com/LLK/scratch-gui/wiki/Getting-Started).
-
-## Running the Development Server
-Open a Command Prompt or Terminal in the repository and run:
-```bash
-npm start
+2. Open a terminal and fire up the following command
+```
+roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 
-## Playground
-To view the Playground, make sure the dev server's running and go to [http://localhost:8073/playground/](http://localhost:8073/playground/) - you will be directed to the playground, which demonstrates various tools and internal state.
+3. Add the `ROS Extension` from the bottom left button and input `localhost` as the master URI
 
-![VM Playground Screenshot](https://i.imgur.com/nOCNqEc.gif)
+## Examples
+
+Examples can be found at the [examples directory](https://github.com/Affonso-Gui/scratch3-ros-vm/tree/develop/src/extensions/scratch3_ros/examples). To run the examples:
+
+1. On a terminal, launch `roslaunch rosbridge_server rosbridge_websocket.launch`
+2. Access http://scratch3-ros.jsk.imi.i.u-tokyo.ac.jp and load the example file
+3. Click on the warning sign near the ROS blocks menu to connect with rosbridge. Use `localhost` as the master URI.
+![warning](https://user-images.githubusercontent.com/20625381/50582008-55e3e400-0ea2-11e9-942e-496bda7c557a.png)
+4. Check comments for other required nodes
+5. Click the green flag to start!
+
+## Blocks API
+
+Details of provided blocks can be found at [BLOCKS.md](https://github.com/Affonso-Gui/scratch3-ros-vm/blob/develop/src/extensions/scratch3_ros/BLOCKS.md).
 
 
-## Standalone Build
-```bash
-npm run build
-```
+## Run from Source
 
-```html
-<script src="/path/to/dist/web/scratch-vm.js"></script>
-<script>
-    var vm = new window.VirtualMachine();
-    // do things
-</script>
-```
+Git clone the repositories below and follow instructions at https://github.com/LLK/scratch-gui/wiki/Getting-Started
+- https://github.com/Affonso-Gui/scratch3-ros-gui
+- https://github.com/Affonso-Gui/scratch3-ros-vm
+- https://github.com/Affonso-Gui/scratch3-ros-parser
 
-## How to include in a Node.js App
-For an extended setup example, check out the /src/playground directory, which includes a fully running VM instance.
-```js
-var VirtualMachine = require('scratch-vm');
-var vm = new VirtualMachine();
+## Develop a library for your own robot
 
-// Block events
-Scratch.workspace.addChangeListener(vm.blockListener);
-
-// Run threads
-vm.start();
-```
-
-## Abstract Syntax Tree
-
-#### Overview
-The Virtual Machine constructs and maintains the state of an [Abstract Syntax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) (AST) by listening to events emitted by the [scratch-blocks](https://github.com/LLK/scratch-blocks) workspace via the `blockListener`. Each target (code-running object, for example, a sprite) keeps an AST for its blocks. At any time, the current state of an AST can be viewed by inspecting the `vm.runtime.targets[...].blocks` object.
-
-#### Anatomy of a Block
-The VM's block representation contains all the important information for execution and storage. Here's an example representing the "when key pressed" script on a workspace:
-```json
-{
-  "_blocks": {
-    "Q]PK~yJ@BTV8Y~FfISeo": {
-      "id": "Q]PK~yJ@BTV8Y~FfISeo",
-      "opcode": "event_whenkeypressed",
-      "inputs": {
-      },
-      "fields": {
-        "KEY_OPTION": {
-          "name": "KEY_OPTION",
-          "value": "space"
-        }
-      },
-      "next": null,
-      "topLevel": true,
-      "parent": null,
-      "shadow": false,
-      "x": -69.333333333333,
-      "y": 174
-    }
-  },
-  "_scripts": [
-    "Q]PK~yJ@BTV8Y~FfISeo"
-  ]
-}
-```
-
-## Testing
-```bash
-npm test
-```
-
-```bash
-npm run coverage
-```
-
-## Publishing to GitHub Pages
-```bash
-npm run deploy
-```
-
-This will push the currently built playground to the gh-pages branch of the
-currently tracked remote.  If you would like to change where to push to, add
-a repo url argument:
-```bash
-npm run deploy -- -r <your repo url>
-```
-
-## Donate
-We provide [Scratch](https://scratch.mit.edu) free of charge, and want to keep it that way! Please consider making a [donation](https://secure.donationpay.org/scratchfoundation/) to support our continued engineering, design, community, and resource development efforts. Donations of any size are appreciated. Thank you!
+You can include Scratch3-ROS on your Scratch project and create custom block libraries for your own robot. An example is given in the `fetch_extension` branch:
+- https://github.com/Affonso-Gui/scratch3-ros-vm/tree/fetch_extension
+- https://github.com/Affonso-Gui/scratch3-ros-gui/tree/fetch_extension

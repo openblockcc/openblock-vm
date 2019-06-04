@@ -26,34 +26,40 @@ sudo apt install ros-kinetic-rosbridge-server
 sudo apt install ros-kinetic-turtlesim ros-kinetic-actionlib-tutorials 
 ```
 
-1. Access https://affonso-gui.github.io/scratch-gui
+1. Access http://scratch3-ros.jsk.imi.i.u-tokyo.ac.jp
 
 2. Open a terminal and fire up the following command
 ```
 roslaunch rosbridge_server rosbridge_websocket.launch
 ```
 
-3. Add the `ROS Extension` from the bottom left button
+3. Add the `ROS Extension` from the bottom left button and input `localhost` as the master URI
 
 ## Examples
 
-Examples can be found at the `examples` directory. To run the examples:
+Examples can be found at the [examples directory](https://github.com/Affonso-Gui/scratch3-ros-vm/tree/develop/src/extensions/scratch3_ros/examples). To run the examples:
 
 1. On a terminal, launch `roslaunch rosbridge_server rosbridge_websocket.launch`
-2. Access https://affonso-gui.github.io/scratch-gui/ and load the downloaded example
-3. Click on the warning sign near the ROS blocks menu to connect with rosbridge
+2. Access http://scratch3-ros.jsk.imi.i.u-tokyo.ac.jp and load the example file
+3. Click on the warning sign near the ROS blocks menu to connect with rosbridge. Use `localhost` as the master URI.
 ![warning](https://user-images.githubusercontent.com/20625381/50582008-55e3e400-0ea2-11e9-942e-496bda7c557a.png)
 4. Check comments for other required nodes
 5. Click the green flag to start!
 
 ## Blocks API
 
-Details of provided blocks can be found at [BLOCKS.md](https://github.com/Affonso-Gui/scratch-vm/blob/develop/src/extensions/scratch3_ros/BLOCKS.md).
+Details of provided blocks can be found at [BLOCKS.md](https://github.com/Affonso-Gui/scratch3-ros-vm/blob/develop/src/extensions/scratch3_ros/BLOCKS.md).
 
 
 ## Run from Source
 
 Git clone the repositories below and follow instructions at https://github.com/LLK/scratch-gui/wiki/Getting-Started
-- https://github.com/Affonso-Gui/scratch-gui
-- https://github.com/Affonso-Gui/scratch-vm
-- https://github.com/Affonso-Gui/scratch-parser
+- https://github.com/Affonso-Gui/scratch3-ros-gui
+- https://github.com/Affonso-Gui/scratch3-ros-vm
+- https://github.com/Affonso-Gui/scratch3-ros-parser
+
+## Develop a library for your own robot
+
+You can include Scratch3-ROS on your Scratch project and create custom block libraries for your own robot. An example is given in the `fetch_extension` branch:
+- https://github.com/Affonso-Gui/scratch3-ros-vm/tree/fetch_extension
+- https://github.com/Affonso-Gui/scratch3-ros-gui/tree/fetch_extension
