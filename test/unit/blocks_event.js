@@ -48,13 +48,14 @@ test('#760 - broadcastAndWait', t => {
 
     const rt = new Runtime();
     const e = new Event(rt);
-    const b = new Blocks();
+    const b = new Blocks(rt);
     b.createBlock(broadcastAndWaitBlock);
     b.createBlock(receiveMessageBlock);
     const tgt = new Target(rt, b);
     tgt.isStage = true;
     tgt.createVariable('testBroadcastID', 'message', Variable.BROADCAST_MESSAGE_TYPE);
-    rt.targets.push(tgt);
+
+    rt.addTarget(tgt);
 
     let th = rt._pushThread('broadcastAndWaitBlock', t);
     const util = new BlockUtility();
@@ -74,6 +75,7 @@ test('#760 - broadcastAndWait', t => {
     // does not yield once all threads are done
     th.status = Thread.STATUS_RUNNING;
     rt.threads[1].status = Thread.STATUS_DONE;
+    rt.threads.splice(1, 1);
     e.broadcastAndWait({BROADCAST_OPTION: {id: 'testBroadcastID', name: 'message'}}, util);
     t.strictEqual(th.status, Thread.STATUS_RUNNING);
 
@@ -82,7 +84,7 @@ test('#760 - broadcastAndWait', t => {
     util.thread = th;
     e.broadcastAndWait({BROADCAST_OPTION: {id: 'testBroadcastID', name: 'message'}}, util);
     t.strictEqual(rt.threads.length, 3);
-    t.strictEqual(rt.threads[1].status, Thread.STATUS_RUNNING);
+    t.strictEqual(rt.threads[2].status, Thread.STATUS_RUNNING);
     t.strictEqual(th.status, Thread.STATUS_YIELD);
     // yields when some restarted thread is active
     th.status = Thread.STATUS_RUNNING;
@@ -90,9 +92,24 @@ test('#760 - broadcastAndWait', t => {
     t.strictEqual(th.status, Thread.STATUS_YIELD);
     // does not yield once all threads are done
     th.status = Thread.STATUS_RUNNING;
-    rt.threads[1].status = Thread.STATUS_DONE;
+    rt.threads[2].status = Thread.STATUS_DONE;
+    rt.threads.splice(2, 1);
     e.broadcastAndWait({BROADCAST_OPTION: {id: 'testBroadcastID', name: 'message'}}, util);
     t.strictEqual(th.status, Thread.STATUS_RUNNING);
 
+    t.end();
+});
+
+test('When > hat - loudness', t => {
+    const rt = new Runtime();
+    rt.audioEngine = {getLoudness: () => 10};
+    const e = new Event(rt);
+    const args = {
+        WHENGREATERTHANMENU: 'LOUDNESS',
+        VALUE: '11'
+    };
+    t.equal(e.hatGreaterThanPredicate(args), false);
+    args.VALUE = '5';
+    t.equal(e.hatGreaterThanPredicate(args), true);
     t.end();
 });

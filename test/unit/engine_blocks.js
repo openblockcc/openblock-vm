@@ -1,8 +1,12 @@
 const test = require('tap').test;
 const Blocks = require('../../src/engine/blocks');
+const Variable = require('../../src/engine/variable');
+const adapter = require('../../src/engine/adapter');
+const events = require('../fixtures/events.json');
+const Runtime = require('../../src/engine/runtime');
 
 test('spec', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
 
     t.type(Blocks, 'function');
     t.type(b, 'object');
@@ -21,14 +25,15 @@ test('spec', t => {
     t.type(b.getNextBlock, 'function');
     t.type(b.getBranch, 'function');
     t.type(b.getOpcode, 'function');
-
+    t.type(b.mutationToXML, 'function');
+    t.type(b.updateSensingOfReference, 'function');
 
     t.end();
 });
 
 // Getter tests
 test('getBlock', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -45,7 +50,7 @@ test('getBlock', t => {
 });
 
 test('getScripts', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     let scripts = b.getScripts();
     t.type(scripts, 'object');
     t.equals(scripts.length, 0);
@@ -86,7 +91,7 @@ test('getScripts', t => {
 });
 
 test('getNextBlock', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -120,7 +125,7 @@ test('getNextBlock', t => {
 });
 
 test('getBranch', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     // Single branch
     b.createBlock({
         id: 'foo',
@@ -155,7 +160,7 @@ test('getBranch', t => {
 });
 
 test('getBranch2', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     // Second branch
     b.createBlock({
         id: 'foo',
@@ -202,7 +207,7 @@ test('getBranch2', t => {
 });
 
 test('getBranch with none', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -217,7 +222,7 @@ test('getBranch with none', t => {
 });
 
 test('getOpcode', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     const block = {
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -235,9 +240,28 @@ test('getOpcode', t => {
     t.end();
 });
 
+test('mutationToXML', t => {
+    const b = new Blocks(new Runtime());
+    const testStringRaw = '"arbitrary" & \'complicated\' test string';
+    const testStringEscaped = '\\&quot;arbitrary\\&quot; &amp; &apos;complicated&apos; test string';
+    const mutation = {
+        tagName: 'mutation',
+        children: [],
+        blockInfo: {
+            text: testStringRaw
+        }
+    };
+    const xml = b.mutationToXML(mutation);
+    t.equals(
+        xml,
+        `<mutation blockInfo="{&quot;text&quot;:&quot;${testStringEscaped}&quot;}"></mutation>`
+    );
+    t.end();
+});
+
 // Block events tests
 test('create', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -254,7 +278,7 @@ test('create', t => {
 });
 
 test('move', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -294,7 +318,7 @@ test('move', t => {
 });
 
 test('move into empty', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -321,7 +345,7 @@ test('move into empty', t => {
 });
 
 test('move no obscure shadow', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -354,8 +378,45 @@ test('move no obscure shadow', t => {
     t.end();
 });
 
+test('move - attaching new shadow', t => {
+    const b = new Blocks(new Runtime());
+    // Block/shadow are null to mimic state right after a procedure_call block
+    // is mutated by adding an input. The "move" will attach the new shadow.
+    b.createBlock({
+        id: 'foo',
+        opcode: 'TEST_BLOCK',
+        next: null,
+        fields: {},
+        inputs: {
+            fooInput: {
+                name: 'fooInput',
+                block: null,
+                shadow: null
+            }
+        },
+        topLevel: true
+    });
+    b.createBlock({
+        id: 'bar',
+        opcode: 'TEST_BLOCK',
+        shadow: true,
+        next: null,
+        fields: {},
+        inputs: {},
+        topLevel: true
+    });
+    b.moveBlock({
+        id: 'bar',
+        newInput: 'fooInput',
+        newParent: 'foo'
+    });
+    t.equal(b._blocks.foo.inputs.fooInput.block, 'bar');
+    t.equal(b._blocks.foo.inputs.fooInput.shadow, 'bar');
+    t.end();
+});
+
 test('change', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -412,7 +473,7 @@ test('change', t => {
 });
 
 test('delete', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -431,7 +492,7 @@ test('delete', t => {
 test('delete chain', t => {
     // Create a chain of connected blocks and delete the top one.
     // All of them should be deleted.
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -469,7 +530,7 @@ test('delete chain', t => {
 test('delete inputs', t => {
     // Create a block with two inputs, one of which has its own input.
     // Delete the block - all of them should be deleted.
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         opcode: 'TEST_BLOCK',
@@ -540,7 +601,7 @@ test('delete inputs', t => {
 });
 
 test('updateAssetName function updates name in sound field', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         fields: {
@@ -557,7 +618,7 @@ test('updateAssetName function updates name in sound field', t => {
 });
 
 test('updateAssetName function updates name in costume field', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         fields: {
@@ -574,7 +635,7 @@ test('updateAssetName function updates name in costume field', t => {
 });
 
 test('updateAssetName function updates name in backdrop field', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'foo',
         fields: {
@@ -591,7 +652,7 @@ test('updateAssetName function updates name in backdrop field', t => {
 });
 
 test('updateAssetName function updates name in all sprite fields', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'id1',
         fields: {
@@ -674,7 +735,7 @@ test('updateAssetName function updates name in all sprite fields', t => {
 });
 
 test('updateAssetName function updates name according to asset type', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'id1',
         fields: {
@@ -703,7 +764,7 @@ test('updateAssetName function updates name according to asset type', t => {
 });
 
 test('updateAssetName only updates given name', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'id1',
         fields: {
@@ -731,7 +792,7 @@ test('updateAssetName only updates given name', t => {
 });
 
 test('updateAssetName doesn\'t update name if name isn\'t being used', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'id1',
         fields: {
@@ -747,8 +808,148 @@ test('updateAssetName doesn\'t update name if name isn\'t being used', t => {
     t.end();
 });
 
+test('updateSensingOfReference renames variables in sensing_of block', t => {
+    const b = new Blocks(new Runtime());
+    b.createBlock({
+        id: 'id1',
+        opcode: 'sensing_of',
+        fields: {
+            PROPERTY: {
+                name: 'PROPERTY',
+                value: 'foo'
+            }
+        },
+        inputs: {
+            OBJECT: {
+                name: 'OBJECT',
+                block: 'id2',
+                shadow: 'id2'
+            }
+        }
+    });
+    b.createBlock({
+        id: 'id2',
+        fields: {
+            OBJECT: {
+                name: 'OBJECT',
+                value: '_stage_'
+            }
+        }
+    });
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    b.updateSensingOfReference('foo', 'bar', '_stage_');
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'bar');
+    t.end();
+});
+
+test('updateSensingOfReference doesn\'t rename if block is inserted', t => {
+    const b = new Blocks(new Runtime());
+    b.createBlock({
+        id: 'id1',
+        opcode: 'sensing_of',
+        fields: {
+            PROPERTY: {
+                name: 'PROPERTY',
+                value: 'foo'
+            }
+        },
+        inputs: {
+            OBJECT: {
+                name: 'OBJECT',
+                block: 'id3',
+                shadow: 'id2'
+            }
+        }
+    });
+    b.createBlock({
+        id: 'id2',
+        fields: {
+            OBJECT: {
+                name: 'OBJECT',
+                value: '_stage_'
+            }
+        }
+    });
+    b.createBlock({
+        id: 'id3',
+        opcode: 'answer'
+    });
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    b.updateSensingOfReference('foo', 'bar', '_stage_');
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    t.end();
+});
+
+test('updateSensingOfReference doesn\'t rename if name is not being used', t => {
+    const b = new Blocks(new Runtime());
+    b.createBlock({
+        id: 'id1',
+        opcode: 'sensing_of',
+        fields: {
+            PROPERTY: {
+                name: 'PROPERTY',
+                value: 'foo'
+            }
+        },
+        inputs: {
+            OBJECT: {
+                name: 'OBJECT',
+                block: 'id2',
+                shadow: 'id2'
+            }
+        }
+    });
+    b.createBlock({
+        id: 'id2',
+        fields: {
+            OBJECT: {
+                name: 'OBJECT',
+                value: '_stage_'
+            }
+        }
+    });
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    b.updateSensingOfReference('meow', 'meow2', '_stage_');
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    t.end();
+});
+
+test('updateSensingOfReference doesn\'t rename other targets\' variables', t => {
+    const b = new Blocks(new Runtime());
+    b.createBlock({
+        id: 'id1',
+        opcode: 'sensing_of',
+        fields: {
+            PROPERTY: {
+                name: 'PROPERTY',
+                value: 'foo'
+            }
+        },
+        inputs: {
+            OBJECT: {
+                name: 'OBJECT',
+                block: 'id2',
+                shadow: 'id2'
+            }
+        }
+    });
+    b.createBlock({
+        id: 'id2',
+        fields: {
+            OBJECT: {
+                name: 'OBJECT',
+                value: '_stage_'
+            }
+        }
+    });
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    b.updateSensingOfReference('foo', 'bar', 'Cat');
+    t.equals(b.getBlock('id1').fields.PROPERTY.value, 'foo');
+    t.end();
+});
+
 test('updateTargetSpecificBlocks changes sprite clicked hat to stage clicked for stage', t => {
-    const b = new Blocks();
+    const b = new Blocks(new Runtime());
     b.createBlock({
         id: 'originallySpriteClicked',
         opcode: 'event_whenthisspriteclicked'
@@ -773,6 +974,67 @@ test('updateTargetSpecificBlocks changes sprite clicked hat to stage clicked for
     // originallyStageClicked does update when on a non-stage target
     b.updateTargetSpecificBlocks(false/* isStage */);
     t.equals(b.getBlock('originallyStageClicked').opcode, 'event_whenthisspriteclicked');
+
+    t.end();
+});
+
+test('getAllVariableAndListReferences returns an empty map references when variable blocks do not exist', t => {
+    const b = new Blocks(new Runtime());
+    t.equal(Object.keys(b.getAllVariableAndListReferences()).length, 0);
+    t.end();
+});
+
+test('getAllVariableAndListReferences returns references when variable blocks exist', t => {
+    const b = new Blocks(new Runtime());
+
+    let varListRefs = b.getAllVariableAndListReferences();
+    t.equal(Object.keys(varListRefs).length, 0);
+
+    b.createBlock(adapter(events.mockVariableBlock)[0]);
+    b.createBlock(adapter(events.mockListBlock)[0]);
+
+    varListRefs = b.getAllVariableAndListReferences();
+    t.equal(Object.keys(varListRefs).length, 2);
+    t.equal(Array.isArray(varListRefs['mock var id']), true);
+    t.equal(varListRefs['mock var id'].length, 1);
+    t.equal(varListRefs['mock var id'][0].type, Variable.SCALAR_TYPE);
+    t.equal(varListRefs['mock var id'][0].referencingField.value, 'a mock variable');
+    t.equal(Array.isArray(varListRefs['mock list id']), true);
+    t.equal(varListRefs['mock list id'].length, 1);
+    t.equal(varListRefs['mock list id'][0].type, Variable.LIST_TYPE);
+    t.equal(varListRefs['mock list id'][0].referencingField.value, 'a mock list');
+
+    t.end();
+});
+
+test('getAllVariableAndListReferences does not return broadcast blocks if the flag is left out', t => {
+    const b = new Blocks(new Runtime());
+    b.createBlock(adapter(events.mockBroadcastBlock)[0]);
+    b.createBlock(adapter(events.mockBroadcastBlock)[1]);
+
+    t.equal(Object.keys(b.getAllVariableAndListReferences()).length, 0);
+    t.end();
+});
+
+test('getAllVariableAndListReferences returns broadcast when we tell it to', t => {
+    const b = new Blocks(new Runtime());
+
+    b.createBlock(adapter(events.mockVariableBlock)[0]);
+    // Make the broadcast block and its shadow (which includes the actual broadcast field).
+    b.createBlock(adapter(events.mockBroadcastBlock)[0]);
+    b.createBlock(adapter(events.mockBroadcastBlock)[1]);
+
+    const varListRefs = b.getAllVariableAndListReferences(null, true);
+
+    t.equal(Object.keys(varListRefs).length, 2);
+    t.equal(Array.isArray(varListRefs['mock var id']), true);
+    t.equal(varListRefs['mock var id'].length, 1);
+    t.equal(varListRefs['mock var id'][0].type, Variable.SCALAR_TYPE);
+    t.equal(varListRefs['mock var id'][0].referencingField.value, 'a mock variable');
+    t.equal(Array.isArray(varListRefs['mock broadcast message id']), true);
+    t.equal(varListRefs['mock broadcast message id'].length, 1);
+    t.equal(varListRefs['mock broadcast message id'][0].type, Variable.BROADCAST_MESSAGE_TYPE);
+    t.equal(varListRefs['mock broadcast message id'][0].referencingField.value, 'my message');
 
     t.end();
 });

@@ -1,5 +1,6 @@
 const Cast = require('../util/cast');
 const Timer = require('../util/timer');
+const getMonitorIdForBlockWithArgs = require('../util/get-monitor-id');
 
 class Scratch3SensingBlocks {
     constructor (runtime) {
@@ -42,6 +43,8 @@ class Scratch3SensingBlocks {
         this.runtime.on('ANSWER', this._onAnswer.bind(this));
         this.runtime.on('PROJECT_START', this._resetAnswer.bind(this));
         this.runtime.on('PROJECT_STOP_ALL', this._clearAllQuestions.bind(this));
+        this.runtime.on('STOP_FOR_TARGET', this._clearTargetQuestions.bind(this));
+        this.runtime.on('RUNTIME_DISPOSED', this._resetAnswer.bind(this));
     }
 
     /**
@@ -65,17 +68,31 @@ class Scratch3SensingBlocks {
             sensing_current: this.current,
             sensing_dayssince2000: this.daysSince2000,
             sensing_loudness: this.getLoudness,
+            sensing_loud: this.isLoud,
             sensing_askandwait: this.askAndWait,
-            sensing_answer: this.getAnswer
+            sensing_answer: this.getAnswer,
+            sensing_username: this.getUsername,
+            sensing_userid: () => {} // legacy no-op block
         };
     }
 
     getMonitored () {
         return {
-            sensing_answer: {},
-            sensing_loudness: {},
-            sensing_timer: {},
-            sensing_current: {}
+            sensing_answer: {
+                getId: () => 'answer'
+            },
+            sensing_loudness: {
+                getId: () => 'loudness'
+            },
+            sensing_timer: {
+                getId: () => 'timer'
+            },
+            sensing_current: {
+                // This is different from the default toolbox xml id in order to support
+                // importing multiple monitors from the same opcode from sb2 files,
+                // something that is not currently supported in scratch 3.
+                getId: (_, fields) => getMonitorIdForBlockWithArgs('current', fields) // _${param}`
+            }
         };
     }
 
@@ -120,6 +137,22 @@ class Scratch3SensingBlocks {
         this.runtime.emit('QUESTION', null);
     }
 
+    _clearTargetQuestions (stopTarget) {
+        const currentlyAsking = this._questionList.length > 0 && this._questionList[0][2] === stopTarget;
+        this._questionList = this._questionList.filter(question => (
+            question[2] !== stopTarget
+        ));
+
+        if (currentlyAsking) {
+            this.runtime.emit('SAY', stopTarget, 'say', '');
+            if (this._questionList.length > 0) {
+                this._askNextQuestion();
+            } else {
+                this.runtime.emit('QUESTION', null);
+            }
+        }
+    }
+
     askAndWait (args, util) {
         const _target = util.target;
         return new Promise(resolve => {
@@ -136,16 +169,7 @@ class Scratch3SensingBlocks {
     }
 
     touchingObject (args, util) {
-        const requestedObject = args.TOUCHINGOBJECTMENU;
-        if (requestedObject === '_mouse_') {
-            const mouseX = util.ioQuery('mouse', 'getClientX');
-            const mouseY = util.ioQuery('mouse', 'getClientY');
-            return util.target.isTouchingPoint(mouseX, mouseY);
-        } else if (requestedObject === '_edge_') {
-            return util.target.isTouchingEdge();
-        }
-        return util.target.isTouchingSprite(requestedObject);
-
+        return util.target.isTouchingObject(args.TOUCHINGOBJECTMENU);
     }
 
     touchingColor (args, util) {
@@ -168,6 +192,7 @@ class Scratch3SensingBlocks {
             targetX = util.ioQuery('mouse', 'getScratchX');
             targetY = util.ioQuery('mouse', 'getScratchY');
         } else {
+            args.DISTANCETOMENU = Cast.toString(args.DISTANCETOMENU);
             const distTarget = this.runtime.getSpriteTargetByName(
                 args.DISTANCETOMENU
             );
@@ -249,14 +274,24 @@ class Scratch3SensingBlocks {
         return this._cachedLoudness;
     }
 
+    isLoud () {
+        return this.getLoudness() > 10;
+    }
+
     getAttributeOf (args) {
         let attrTarget;
 
         if (args.OBJECT === '_stage_') {
             attrTarget = this.runtime.getTargetForStage();
         } else {
+            args.OBJECT = Cast.toString(args.OBJECT);
             attrTarget = this.runtime.getSpriteTargetByName(args.OBJECT);
         }
+
+        // attrTarget can be undefined if the target does not exist
+        // (e.g. single sprite uploaded from larger project referencing
+        // another sprite that wasn't uploaded)
+        if (!attrTarget) return 0;
 
         // Generic attributes
         if (attrTarget.isStage) {
@@ -282,16 +317,19 @@ class Scratch3SensingBlocks {
             }
         }
 
-        // Variables
+        // Target variables.
         const varName = args.PROPERTY;
-        for (const id in attrTarget.variables) {
-            if (attrTarget.variables[id].name === varName) {
-                return attrTarget.variables[id].value;
-            }
+        const variable = attrTarget.lookupVariableByNameAndType(varName, '', true);
+        if (variable) {
+            return variable.value;
         }
 
         // Otherwise, 0
         return 0;
+    }
+
+    getUsername (args, util) {
+        return util.ioQuery('userData', 'getUsername');
     }
 }
 

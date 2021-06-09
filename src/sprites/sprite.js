@@ -2,12 +2,15 @@ const RenderedTarget = require('./rendered-target');
 const Blocks = require('../engine/blocks');
 const {loadSoundFromAsset} = require('../import/load-sound');
 const {loadCostumeFromAsset} = require('../import/load-costume');
+const newBlockIds = require('../util/new-block-ids');
 const StringUtil = require('../util/string-util');
+const StageLayering = require('../engine/stage-layering');
 
 class Sprite {
     /**
      * Sprite to be used on the Scratch stage.
-     * All clones of a sprite have shared blocks, shared costumes, shared variables.
+     * All clones of a sprite have shared blocks, shared costumes, shared variables,
+     * shared sounds, etc.
      * @param {?Blocks} blocks Shared blocks object for all clones of sprite.
      * @param {Runtime} runtime Reference to the runtime.
      * @constructor
@@ -16,7 +19,7 @@ class Sprite {
         this.runtime = runtime;
         if (!blocks) {
             // Shared set of blocks for all clones.
-            blocks = new Blocks();
+            blocks = new Blocks(runtime);
         }
         this.blocks = blocks;
         /**
@@ -46,8 +49,13 @@ class Sprite {
          * @type {Array.<!RenderedTarget>}
          */
         this.clones = [];
+
+        this.soundBank = null;
+        if (this.runtime && this.runtime.audioEngine) {
+            this.soundBank = this.runtime.audioEngine.createBank();
+        }
     }
-    
+
     /**
      * Add an array of costumes, taking care to avoid duplicate names.
      * @param {!Array<object>} costumes Array of objects representing costumes.
@@ -86,24 +94,27 @@ class Sprite {
     /**
      * Delete a costume by index.
      * @param {number} index Costume index to be deleted
+     * @return {?object} The deleted costume
      */
     deleteCostumeAt (index) {
-        this.costumes_ = this.costumes_
-            .slice(0, index)
-            .concat(this.costumes_.slice(index + 1));
+        return this.costumes.splice(index, 1)[0];
     }
 
     /**
      * Create a clone of this sprite.
+     * @param {string=} optLayerGroup Optional layer group the clone's drawable should be added to
+     * Defaults to the sprite layer group
      * @returns {!RenderedTarget} Newly created clone.
      */
-    createClone () {
+    createClone (optLayerGroup) {
         const newClone = new RenderedTarget(this, this.runtime);
         newClone.isOriginal = this.clones.length === 0;
         this.clones.push(newClone);
         newClone.initAudio();
         if (newClone.isOriginal) {
-            newClone.initDrawable();
+            // Default to the sprite layer group if optLayerGroup is not provided
+            const layerGroup = typeof optLayerGroup === 'string' ? optLayerGroup : StageLayering.SPRITE_LAYER;
+            newClone.initDrawable(layerGroup);
             this.runtime.fireTargetWasCreated(newClone);
         } else {
             this.runtime.fireTargetWasCreated(newClone, this.clones[0]);
@@ -126,8 +137,14 @@ class Sprite {
 
     duplicate () {
         const newSprite = new Sprite(null, this.runtime);
+        const blocksContainer = this.blocks._blocks;
+        const originalBlocks = Object.keys(blocksContainer).map(key => blocksContainer[key]);
+        const copiedBlocks = JSON.parse(JSON.stringify(originalBlocks));
+        newBlockIds(copiedBlocks);
+        copiedBlocks.forEach(block => {
+            newSprite.blocks.createBlock(block);
+        });
 
-        newSprite.blocks = this.blocks.duplicate();
 
         const allNames = this.runtime.targets.map(t => t.sprite.name);
         newSprite.name = StringUtil.unusedName(this.name, allNames);
@@ -136,19 +153,24 @@ class Sprite {
 
         newSprite.costumes = this.costumes_.map(costume => {
             const newCostume = Object.assign({}, costume);
-            const costumeAsset = this.runtime.storage.get(costume.assetId);
-            assetPromises.push(loadCostumeFromAsset(newCostume, costumeAsset, this.runtime));
+            assetPromises.push(loadCostumeFromAsset(newCostume, this.runtime));
             return newCostume;
         });
 
         newSprite.sounds = this.sounds.map(sound => {
             const newSound = Object.assign({}, sound);
-            const soundAsset = this.runtime.storage.get(sound.assetId);
-            assetPromises.push(loadSoundFromAsset(newSound, soundAsset, this.runtime));
+            const soundAsset = sound.asset;
+            assetPromises.push(loadSoundFromAsset(newSound, soundAsset, this.runtime, newSprite.soundBank));
             return newSound;
         });
 
         return Promise.all(assetPromises).then(() => newSprite);
+    }
+
+    dispose () {
+        if (this.soundBank) {
+            this.soundBank.dispose();
+        }
     }
 }
 

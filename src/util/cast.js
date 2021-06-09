@@ -20,8 +20,18 @@ class Cast {
      * @return {number} The Scratch-casted number value.
      */
     static toNumber (value) {
+        // If value is already a number we don't need to coerce it with
+        // Number().
+        if (typeof value === 'number') {
+            // Scratch treats NaN as 0, when needed as a number.
+            // E.g., 0 + NaN -> 0.
+            if (Number.isNaN(value)) {
+                return 0;
+            }
+            return value;
+        }
         const n = Number(value);
-        if (isNaN(n)) {
+        if (Number.isNaN(n)) {
             // Scratch treats NaN as 0, when needed as a number.
             // E.g., 0 + NaN -> 0.
             return 0;
@@ -83,6 +93,9 @@ class Cast {
         let color;
         if (typeof value === 'string' && value.substring(0, 1) === '#') {
             color = Color.hexToRgb(value);
+
+            // If the color wasn't *actually* a hex color, cast to black
+            if (!color) color = {r: 0, g: 0, b: 0, a: 255};
         } else {
             color = Color.decimalToRgb(Cast.toNumber(value));
         }
@@ -118,11 +131,22 @@ class Cast {
             // Scratch compares strings as case insensitive.
             const s1 = String(v1).toLowerCase();
             const s2 = String(v2).toLowerCase();
-            return s1.localeCompare(s2);
+            if (s1 < s2) {
+                return -1;
+            } else if (s1 > s2) {
+                return 1;
+            }
+            return 0;
+        }
+        // Handle the special case of Infinity
+        if (
+            (n1 === Infinity && n2 === Infinity) ||
+            (n1 === -Infinity && n2 === -Infinity)
+        ) {
+            return 0;
         }
         // Compare as numbers.
         return n1 - n2;
-
     }
 
     /**
@@ -163,12 +187,13 @@ class Cast {
      * LIST_INVALID: if the index was invalid in any way.
      * @param {*} index Scratch arg, including 1-based numbers or special cases.
      * @param {number} length Length of the list.
+     * @param {boolean} acceptAll Whether it should accept "all" or not.
      * @return {(number|string)} 1-based index for list, LIST_ALL, or LIST_INVALID.
      */
-    static toListIndex (index, length) {
+    static toListIndex (index, length, acceptAll) {
         if (typeof index !== 'number') {
             if (index === 'all') {
-                return Cast.LIST_ALL;
+                return acceptAll ? Cast.LIST_ALL : Cast.LIST_INVALID;
             }
             if (index === 'last') {
                 if (length > 0) {

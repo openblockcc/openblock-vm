@@ -28,7 +28,6 @@ test('multiply', t => {
 
 test('divide', t => {
     t.strictEqual(blocks.divide({NUM1: '2', NUM2: '2'}), 1);
-    t.strictEqual(blocks.divide({NUM1: '1', NUM2: '0'}), Infinity); // @todo
     t.ok(isNaN(blocks.divide({NUM1: 'foo', NUM2: 'bar'}))); // @todo
     t.end();
 });
@@ -37,6 +36,8 @@ test('lt', t => {
     t.strictEqual(blocks.lt({OPERAND1: '1', OPERAND2: '2'}), true);
     t.strictEqual(blocks.lt({OPERAND1: '2', OPERAND2: '1'}), false);
     t.strictEqual(blocks.lt({OPERAND1: '1', OPERAND2: '1'}), false);
+    t.strictEqual(blocks.lt({OPERAND1: '10', OPERAND2: '2'}), false);
+    t.strictEqual(blocks.lt({OPERAND1: 'a', OPERAND2: 'z'}), true);
     t.end();
 });
 
@@ -44,6 +45,7 @@ test('equals', t => {
     t.strictEqual(blocks.equals({OPERAND1: '1', OPERAND2: '2'}), false);
     t.strictEqual(blocks.equals({OPERAND1: '2', OPERAND2: '1'}), false);
     t.strictEqual(blocks.equals({OPERAND1: '1', OPERAND2: '1'}), true);
+    t.strictEqual(blocks.equals({OPERAND1: 'あ', OPERAND2: 'ア'}), false);
     t.end();
 });
 

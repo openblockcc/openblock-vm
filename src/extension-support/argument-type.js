@@ -26,7 +26,22 @@ const ArgumentType = {
     /**
      * String value with text field
      */
-    STRING: 'string'
+    STRING: 'string',
+
+    /**
+     * String value with matrix field
+     */
+    MATRIX: 'matrix',
+
+    /**
+     * MIDI note number with note picker (piano) field
+     */
+    NOTE: 'note',
+
+    /**
+     * Inline image on block (as part of the label)
+     */
+    IMAGE: 'image'
 };
 
 module.exports = ArgumentType;

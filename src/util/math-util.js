@@ -63,6 +63,60 @@ class MathUtil {
             return parseFloat(Math.tan((Math.PI * angle) / 180).toFixed(10));
         }
     }
+
+    /**
+     * Given an array of unique numbers,
+     * returns a reduced array such that each element of the reduced array
+     * represents the position of that element in a sorted version of the
+     * original array.
+     * E.g. [5, 19. 13, 1] => [1, 3, 2, 0]
+     * @param {Array<number>} elts The elements to sort and reduce
+     * @return {Array<number>} The array of reduced orderings
+     */
+    static reducedSortOrdering (elts) {
+        const sorted = elts.slice(0).sort((a, b) => a - b);
+        return elts.map(e => sorted.indexOf(e));
+    }
+
+    /**
+     * Return a random number given an inclusive range and a number in that
+     * range that should be excluded.
+     *
+     * For instance, (1, 5, 3) will only pick 1, 2, 4, or 5 (with equal
+     * probability)
+     *
+     * @param {number} lower - The lower bound (inlcusive)
+     * @param {number} upper - The upper bound (inclusive), such that lower <= upper
+     * @param {number} excluded - The number to exclude (MUST be in the range)
+     * @return {number} A random integer in the range [lower, upper] that is not "excluded"
+     */
+    static inclusiveRandIntWithout (lower, upper, excluded) {
+        // Note that subtraction is the number of items in the
+        // inclusive range [lower, upper] minus 1 already
+        // (e.g. in the set {3, 4, 5}, 5 - 3 = 2).
+        const possibleOptions = upper - lower;
+
+        const randInt = lower + Math.floor(Math.random() * possibleOptions);
+        if (randInt >= excluded) {
+            return randInt + 1;
+        }
+
+        return randInt;
+    }
+ 
+    /**
+     * Scales a number from one range to another.
+     * @param {number} i number to be scaled
+     * @param {number} iMin input range minimum
+     * @param {number} iMax input range maximum
+     * @param {number} oMin output range minimum
+     * @param {number} oMax output range maximum
+     * @return {number} scaled number
+     */
+    static scale (i, iMin, iMax, oMin, oMax) {
+        const p = (i - iMin) / (iMax - iMin);
+        return (p * (oMax - oMin)) + oMin;
+    }
 }
 
 module.exports = MathUtil;

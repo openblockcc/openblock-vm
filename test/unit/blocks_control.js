@@ -1,6 +1,7 @@
 const test = require('tap').test;
 const Control = require('../../src/blocks/scratch3_control');
 const Runtime = require('../../src/engine/runtime');
+const BlockUtility = require('../../src/engine/block-utility');
 
 test('getPrimitives', t => {
     const rt = new Runtime();
@@ -28,6 +29,33 @@ test('repeat', t => {
     c.repeat({TIMES: 10}, util);
     t.strictEqual(util.stackFrame.loopCounter, -1);
     t.strictEqual(i, repeat);
+    t.end();
+});
+
+test('repeat rounds with round()', t => {
+    const rt = new Runtime();
+    const c = new Control(rt);
+
+    const roundingTest = (inputForRepeat, expectedTimes) => {
+        // Test harness (mocks `util`)
+        let i = 0;
+        const util = {
+            stackFrame: Object.create(null),
+            startBranch: function () {
+                i++;
+                c.repeat({TIMES: inputForRepeat}, util);
+            }
+        };
+
+        // Execute test
+        c.repeat({TIMES: inputForRepeat}, util);
+        t.strictEqual(i, expectedTimes);
+    };
+
+    // Execute tests
+    roundingTest(3.2, 3);
+    roundingTest(3.7, 4);
+    roundingTest(3.5, 4);
     t.end();
 });
 
@@ -206,5 +234,61 @@ test('counter, incrCounter, clearCounter', t => {
     c.clearCounter();
     t.strictEqual(c.getCounter(), 0);
 
+    t.end();
+});
+
+test('allAtOnce', t => {
+    const rt = new Runtime();
+    const c = new Control(rt);
+
+    // Test harness (mocks `util`)
+    let ran = false;
+    const util = {
+        startBranch: function () {
+            ran = true;
+        }
+    };
+
+    // Execute test
+    c.allAtOnce({}, util);
+    t.true(ran);
+    t.end();
+});
+
+test('wait', t => {
+    const rt = new Runtime();
+    const c = new Control(rt);
+    const args = {DURATION: .01};
+    const waitTime = args.DURATION * 1000;
+    const startTest = Date.now();
+    const threshold = 1000 / 60; // 60 hz
+    let yields = 0;
+    const util = new BlockUtility();
+    const mockUtil = {
+        stackFrame: {},
+        yield: () => yields++,
+        stackTimerNeedsInit: util.stackTimerNeedsInit,
+        startStackTimer: util.startStackTimer,
+        stackTimerFinished: util.stackTimerFinished
+    };
+
+    c.wait(args, mockUtil);
+    t.equal(yields, 1, 'First wait block yielded');
+
+    // Spin the cpu until enough time passes
+    let timeElapsed = 0;
+    while (timeElapsed < waitTime) {
+        timeElapsed = mockUtil.stackFrame.timer.timeElapsed();
+        // In case util.timer is broken - have our own "exit"
+        if (Date.now() - startTest > timeElapsed + threshold) {
+            break;
+        }
+    }
+
+    c.wait(args, mockUtil);
+    t.equal(yields, 1, 'Second call after timeElapsed does not yield');
+    t.equal(waitTime, mockUtil.stackFrame.duration);
+    t.ok(timeElapsed >= (waitTime - threshold) &&
+         timeElapsed <= (waitTime + threshold));
     t.end();
 });

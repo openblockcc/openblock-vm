@@ -49,7 +49,8 @@ test('local', t => {
 
 test('remote', t => {
     const fixturesDir = path.resolve(__dirname, '../fixtures');
-    const worker = new Worker('./test/fixtures/dispatch-test-worker-shim.js', null, {cwd: fixturesDir});
+    const shimPath = path.resolve(fixturesDir, 'dispatch-test-worker-shim.js');
+    const worker = new Worker(shimPath, null, {cwd: fixturesDir});
     dispatch.addWorker(worker);
 
     const waitForWorker = new Promise(resolve => {
@@ -60,4 +61,22 @@ test('remote', t => {
     return waitForWorker
         .then(() => runServiceTest('RemoteDispatchTest', t), e => t.fail(e))
         .then(() => dispatch._remoteCall(worker, 'dispatch', 'terminate'), e => t.fail(e));
+});
+
+test('local, sync', t => {
+    dispatch.setServiceSync('SyncDispatchTest', new DispatchTestService());
+
+    const a = dispatch.callSync('SyncDispatchTest', 'returnFortyTwo');
+    t.equal(a, 42);
+
+    const b = dispatch.callSync('SyncDispatchTest', 'doubleArgument', 9);
+    t.equal(b, 18);
+
+    const c = dispatch.callSync('SyncDispatchTest', 'doubleArgument', 123);
+    t.equal(c, 246);
+
+    t.throws(() => dispatch.callSync('SyncDispatchTest', 'throwException'),
+        new Error('This is a test exception thrown by DispatchTest'));
+
+    t.end();
 });
