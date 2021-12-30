@@ -489,7 +489,7 @@ class OpenBlockArduinoUnoDevice {
 
                 blocks: [
                     {
-                        opcode: 'setPinMode',
+                        opcode: 'pinModeSet',
                         text: formatMessage({
                             id: 'arduinoUno.pins.setPinMode',
                             default: 'set pin [PIN] mode [MODE]',
