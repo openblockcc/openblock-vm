@@ -94,6 +94,7 @@ const decode32BitSignedInteger = function (bytes) {
  *                       wrapped in a Buffer and written to the transport.
  */
 const writeToTransport = function (board, data) {
+    console.log("writeToTransport", data);
     board.transportWrite(data);
 };
 
