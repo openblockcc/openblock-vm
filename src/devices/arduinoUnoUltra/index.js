@@ -553,9 +553,9 @@ class OpenBlockArduinoUnoUltraDevice {
                     description: 'The name of the arduino unoUltra device'
                 }),
 				menuIconURI: menuIconURI,
-                color1: '#FF009D',
-                color2: '#E6008E', 
-                color3: '#CC007E',
+                color1: '#FFBF00',
+                color2: '#E6AC00',
+                color3: '#CC9900',
 				blocks: [
                     {
                         opcode: 'UnoUltraheader',
