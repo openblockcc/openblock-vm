@@ -114,8 +114,8 @@ class ArduinoPeripheral{
          * @private
          */
         this._firmataTimeoutID = null;
-
-        /**
+		
+		/**
          * Timeout ID for firmata get ready event timeout.
          * @type {number}
          * @private
@@ -146,7 +146,7 @@ class ArduinoPeripheral{
      * @param {string} code - the code want to upload.
      */
     upload (code) {
-        // Delete curent firmata. Otherwise, after uploading a new program in upload mode,
+	        // Delete curent firmata. Otherwise, after uploading a new program in upload mode,
         // when returning to real time mode, since the old fimata service still exists,
         // an RealtimeDisconnectErrorerror will be reported quickly.
         if (this._firmata) {
@@ -154,7 +154,6 @@ class ArduinoPeripheral{
             this._firmata.removeAllListeners('ready');
             delete this._firmata;
         }
-
         const base64Str = Buffer.from(code).toString('base64');
         this._serialport.upload(base64Str, this.diveceOpt, 'base64');
     }
@@ -163,7 +162,7 @@ class ArduinoPeripheral{
      * Called by the runtime when user wants to upload realtime firmware to a peripheral.
      */
     uploadFirmware () {
-        if (this._firmata) {
+		if (this._firmata) {
             this._firmata.removeAllListeners('reportversion');
             this._firmata.removeAllListeners('ready');
             delete this._firmata;
@@ -222,7 +221,7 @@ class ArduinoPeripheral{
      * Reset all the state and timeout/interval ids.
      */
     reset () {
-        if (this._firmata) {
+         if (this._firmata) {
             this._firmata.removeAllListeners('reportversion');
             this._firmata.removeAllListeners('ready');
             delete this._firmata;
@@ -234,6 +233,7 @@ class ArduinoPeripheral{
         this._stopHeartbeat();
         this._runtime.removeListener(this._runtime.constructor.PROGRAM_MODE_UPDATE, this._handleProgramModeUpdate);
         this._runtime.removeListener(this._runtime.constructor.PERIPHERAL_UPLOAD_SUCCESS, this._startHeartbeat);
+
     }
 
     /**
@@ -374,7 +374,7 @@ class ArduinoPeripheral{
         if (this._runtime.getCurrentIsRealtimeMode()) {
             this._startHeartbeat();
         } else {
-            // If _firmataReadyTimeoutID is still not null when switching to upload mode, it means
+		     // If _firmataReadyTimeoutID is still not null when switching to upload mode, it means
             // that the Firmata protocol has not completed the initial communication, reset the
             // firmata and wait for the next connection.
             if (this._firmataReadyTimeoutID) {
@@ -516,7 +516,7 @@ class ArduinoPeripheral{
                 this._firmata.digitalRead(pin, value => {
                     resolve(value);
                 });
-                window.setTimeout(() => {
+				window.setTimeout(() => {
                     resolve();
                 }, FrimataReadTimeout);
             });
@@ -537,7 +537,7 @@ class ArduinoPeripheral{
                 this._firmata.analogRead(pin, value => {
                     resolve(value);
                 });
-                window.setTimeout(() => {
+				 window.setTimeout(() => {
                     resolve();
                 }, FrimataReadTimeout);
             });
