@@ -27,7 +27,8 @@ const PNPID_LIST = [
 const SERIAL_CONFIG = {
     baudRate: 57600,
     dataBits: 8,
-    stopBits: 1
+    stopBits: 1,
+    hupcl:true
 };
 
 /**
@@ -38,6 +39,8 @@ const DIVECE_OPT = {
     type: 'arduino',
     fqbn: 'SparkFun:avr:makeymakey'
 };
+
+const menuIconURI = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MCA0MCI+PHN0eWxlPi5zdDJ7ZmlsbDpyZWR9LnN0M3tmaWxsOiNlMGUwZTB9LnN0NHtmaWxsOm5vbmU7c3Ryb2tlOiM2NjY7c3Ryb2tlLXdpZHRoOi41O3N0cm9rZS1taXRlcmxpbWl0OjEwfTwvc3R5bGU+PHBhdGggZD0iTTM1IDI4SDVhMSAxIDAgMCAxLTEtMVYxMmMwLS42LjQtMSAxLTFoMzBjLjUgMCAxIC40IDEgMXYxNWMwIC41LS41IDEtMSAxeiIgZmlsbD0iI2ZmZiIgaWQ9IkxheWVyXzYiLz48ZyBpZD0iTGF5ZXJfNCI+PHBhdGggY2xhc3M9InN0MiIgZD0iTTQgMjVoMzJ2Mi43SDR6TTEzIDI0aC0yLjJhMSAxIDAgMCAxLTEtMXYtOS43YzAtLjYuNC0xIDEtMUgxM2MuNiAwIDEgLjQgMSAxVjIzYzAgLjYtLjUgMS0xIDF6Ii8+PHBhdGggY2xhc3M9InN0MiIgZD0iTTYuMSAxOS4zdi0yLjJjMC0uNS40LTEgMS0xaDkuN2MuNSAwIDEgLjUgMSAxdjIuMmMwIC41LS41IDEtMSAxSDcuMWExIDEgMCAwIDEtMS0xeiIvPjxjaXJjbGUgY2xhc3M9InN0MiIgY3g9IjIyLjgiIGN5PSIxOC4yIiByPSIzLjQiLz48Y2lyY2xlIGNsYXNzPSJzdDIiIGN4PSIzMC42IiBjeT0iMTguMiIgcj0iMy40Ii8+PHBhdGggY2xhc3M9InN0MiIgZD0iTTQuMiAyN2gzMS45di43SDQuMnoiLz48L2c+PGcgaWQ9IkxheWVyXzUiPjxjaXJjbGUgY2xhc3M9InN0MyIgY3g9IjIyLjgiIGN5PSIxOC4yIiByPSIyLjMiLz48Y2lyY2xlIGNsYXNzPSJzdDMiIGN4PSIzMC42IiBjeT0iMTguMiIgcj0iMi4zIi8+PHBhdGggY2xhc3M9InN0MyIgZD0iTTEyLjUgMjIuOWgtMS4yYy0uMyAwLS41LS4yLS41LS41VjE0YzAtLjMuMi0uNS41LS41aDEuMmMuMyAwIC41LjIuNS41djguNGMwIC4zLS4yLjUtLjUuNXoiLz48cGF0aCBjbGFzcz0ic3QzIiBkPSJNNy4yIDE4Ljd2LTEuMmMwLS4zLjItLjUuNS0uNWg4LjRjLjMgMCAuNS4yLjUuNXYxLjJjMCAuMy0uMi41LS41LjVINy43Yy0uMyAwLS41LS4yLS41LS41ek00IDI2aDMydjJINHoiLz48L2c+PGcgaWQ9IkxheWVyXzMiPjxwYXRoIGNsYXNzPSJzdDQiIGQ9Ik0zNS4yIDI3LjlINC44YTEgMSAwIDAgMS0xLTFWMTIuMWMwLS42LjUtMSAxLTFoMzAuNWMuNSAwIDEgLjQgMSAxVjI3YTEgMSAwIDAgMS0xLjEuOXoiLz48cGF0aCBjbGFzcz0ic3Q0IiBkPSJNMzUuMiAyNy45SDQuOGExIDEgMCAwIDEtMS0xVjEyLjFjMC0uNi41LTEgMS0xaDMwLjVjLjUgMCAxIC40IDEgMVYyN2ExIDEgMCAwIDEtMS4xLjl6Ii8+PC9nPjwvc3ZnPg==';
 
 const Pins = {
     D0: 'PD0',
@@ -69,7 +72,6 @@ const Buadrate = {
     B19200: '19200',
     B38400: '38400',
     B57600: '57600',
-    B76800: '76800',
     B115200: '115200'
 };
 
@@ -213,6 +215,47 @@ class OpenBlockMakeyMakeyDevice {
                     description: 'label for input-pullup pin mode'
                 }),
                 value: Mode.InputPullup
+            }
+        ];
+    }
+
+    get DIGITAL_PINS_MENU () {
+        return [
+            {
+                text: 'D0',
+                value: Pins.D0
+            },
+            {
+                text: 'D1',
+                value: Pins.D1
+            },
+            {
+                text: 'D2',
+                value: Pins.D2
+            },
+            {
+                text: 'D3',
+                value: Pins.D3
+            },
+            {
+                text: 'D4',
+                value: Pins.D4
+            },
+            {
+                text: 'D5',
+                value: Pins.D5
+            },
+            {
+                text: 'D14',
+                value: Pins.D14
+            },
+            {
+                text: 'D15',
+                value: Pins.D15
+            },
+            {
+                text: 'D16',
+                value: Pins.D16
             }
         ];
     }
@@ -370,10 +413,6 @@ class OpenBlockMakeyMakeyDevice {
                 value: Buadrate.B57600
             },
             {
-                text: '76800',
-                value: Buadrate.B76800
-            },
-            {
                 text: '115200',
                 value: Buadrate.B115200
             }
@@ -451,6 +490,29 @@ class OpenBlockMakeyMakeyDevice {
      */
     getInfo () {
         return [
+			{
+				id: 'makeyMakey',
+				name: formatMessage({
+                    id: 'arduinoUno.category.makeymakey',
+                    default: 'Makey Makey',
+                    description: 'The name of the makeyMakey device'
+                }),
+				menuIconURI: menuIconURI,
+                color1: '#FFBF00',
+                color2: '#E6AC00',
+                color3: '#CC9900',
+				blocks: [
+                    {
+                        opcode: 'makeyMakeyheader',
+                        text: formatMessage({
+                            id: 'arduinoUno.uno.header',
+                            default: 'when MakeyMakey begins',
+                            description: 'makeyMakey header'
+                        }),
+                        blockType: BlockType.HAT,
+						programMode: [ProgramModeType.UPLOAD]
+                    }]
+			},
             {
                 id: 'pin',
                 name: formatMessage({
@@ -538,7 +600,7 @@ class OpenBlockMakeyMakeyDevice {
                         arguments: {
                             PIN: {
                                 type: ArgumentType.STRING,
-                                menu: 'pins',
+                                menu: 'digitalPins',
                                 defaultValue: Pins.D0
                             }
                         }
@@ -631,6 +693,9 @@ class OpenBlockMakeyMakeyDevice {
                     mode: {
                         items: this.MODE_MENU
                     },
+                    digitalPins: {
+                        items: this.DIGITAL_PINS_MENU
+                    },
                     analogPins: {
                         items: this.ANALOG_PINS_MENU
                     },
@@ -677,6 +742,22 @@ class OpenBlockMakeyMakeyDevice {
                                 type: ArgumentType.STRING,
                                 menu: 'baudrate',
                                 defaultValue: Buadrate.B9600
+                            }
+                        },
+                        programMode: [ProgramModeType.UPLOAD]
+                    },
+					{
+                        opcode: 'serialTimeout',
+                        text: formatMessage({
+                            id: 'arduinoUno.serial.serialTimeout',
+                            default: 'serial set timeout [ARG0]',
+                            description: 'arduinoUno serial timeout'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            ARG0: {
+                                type: ArgumentType.NUMBER,
+                                defaultValue: '100'
                             }
                         },
                         programMode: [ProgramModeType.UPLOAD]
@@ -841,8 +922,8 @@ class OpenBlockMakeyMakeyDevice {
                         opcode: 'dataConvertASCIINumber',
                         text: formatMessage({
                             id: 'arduinoUno.data.dataConvertASCIINumber',
-                            default: 'convert [DATA] to ASCII nubmer',
-                            description: 'makeymakey data convert to ASCII nubmer'
+                            default: 'convert [DATA] to ASCII number',
+                            description: 'makeymakey data convert to ASCII number'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {

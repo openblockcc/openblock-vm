@@ -37,7 +37,9 @@ const builtinDevices = {
     arduinoEsp8266: () => require('../devices/arduinoEsp8266'),
     microbit: () => require('../devices/microbit'),
     makeyMakey: () => require('../devices/makeymakey'),
-    microbitV2: () => require('../devices/microbitV2')
+    microbitV2: () => require('../devices/microbitV2'),
+    maixduino: () => require('../devices/maixduino'),
+    raspberrypico: () => require('../devices/raspberrypico')
 
     // todo transform these to device extension
     // wedo2: () => require('../extensions/scratch3_wedo2'),
@@ -243,22 +245,22 @@ class ExtensionManager {
      * @returns {Promise} resolved once the device is loaded and initialized or rejected on failure
      */
     loadDeviceURL (deviceId, deviceType, pnpidList) {
-        // if no deviceid return
+		// if no deviceid return
         if (deviceId === null) {
             return Promise.resolve();
         }
-
         const realDeviceId = this.runtime.analysisRealDeviceId(deviceId);
 
         if (builtinDevices.hasOwnProperty(realDeviceId)) {
             if (this.isDeviceLoaded(deviceId)) {
+
                 const message = `Rejecting attempt to load a device twice with ID ${deviceId}`;
                 log.warn(message);
                 return Promise.resolve();
             }
 
-            // Try to disconnect the old device before change device.
-            this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
+			// Try to disconnect the old device before change device.
+			this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
 
             this.runtime.setDevice(deviceId);
             this.runtime.setDeviceType(deviceType);
@@ -279,17 +281,18 @@ class ExtensionManager {
             return Promise.resolve();
         } else if (realDeviceId === 'unselectDevice') { // unload the device return to pure realtime programming mode.
             this.clearDevice();
+
             return Promise.resolve();
         }
 
         return Promise.reject(`Error while load device can not find device: ${deviceId}`);
     }
 
-    /**
+	/**
      * Clear curent device
      */
     clearDevice () {
-        this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
+		this.runtime.disconnectPeripheral(this.runtime.getCurrentDevice());
 
         this.runtime.setDevice(null);
         this.runtime.setDeviceType(null);
