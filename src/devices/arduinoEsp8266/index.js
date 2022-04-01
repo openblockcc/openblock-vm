@@ -4,7 +4,7 @@ const ArgumentType = require('../../extension-support/argument-type');
 const BlockType = require('../../extension-support/block-type');
 const ProgramModeType = require('../../extension-support/program-mode-type');
 
-const EspPeripheral = require('../arduinoCommon/esp-peripheral');
+const CommonPeripheral = require('../common/common-peripheral');
 
 /**
  * The list of USB device filters.
@@ -100,7 +100,7 @@ const DataType = {
 /**
  * Manage communication with a Arduino Esp8266 peripheral over a OpenBlock Link client socket.
  */
-class arduinoEsp8266 extends EspPeripheral{
+class arduinoEsp8266 extends CommonPeripheral{
     /**
      * Construct a Arduino communication object.
      * @param {Runtime} runtime - the OpenBlock runtime

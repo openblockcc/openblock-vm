@@ -4,12 +4,12 @@ const Serialport = require('../../io/serialport');
 const Base64Util = require('../../util/base64-util');
 
 /**
- * Manage communication with a Microbit peripheral over a OpenBlock Link client socket.
+ * Manage communication with a common peripheral over a OpenBlock Link client socket.
  */
-class MicrobitPeripheral{
+class CommonPeripheral{
 
     /**
-     * Construct a Arduino communication object.
+     * Construct a common communication object.
      * @param {Runtime} runtime - the OpenBlock runtime
      * @param {string} deviceId - the id of the peripheral
      * @param {string} originalDeviceId - the original id of the peripheral, like xxx_arduinoUno
@@ -180,4 +180,4 @@ class MicrobitPeripheral{
     }
 }
 
-module.exports = MicrobitPeripheral;
+module.exports = CommonPeripheral;
