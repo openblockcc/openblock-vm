@@ -1909,6 +1909,18 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * Abort upload process.
+     * @param {string} deviceId - the id of the extension.
+     */
+    abortUploadProcess (deviceId) {
+        deviceId = this.analysisRealDeviceId(deviceId);
+
+        if (this.peripheralExtensions[deviceId]) {
+            this.peripheralExtensions[deviceId].abort();
+        }
+    }
+
+    /**
      * Upload realtime firware to the extension's specified peripheral.
      * @param {string} deviceId - the id of the device.
      */
