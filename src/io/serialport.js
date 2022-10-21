@@ -173,11 +173,10 @@ class Serialport extends JSONRPC {
 
     /**
      * abort the uploading process.
-     * @param {object} config - the configuration of upload process.
      * @return {Promise} - a promise from the remote send request.
      */
-    abort (config) {
-        const params = {config};
+    abortUpload () {
+        const params = {};
         return this.sendRemoteRequest('abort', params)
             .catch(e => {
                 this.handleDisconnectError(e);

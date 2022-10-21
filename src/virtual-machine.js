@@ -365,10 +365,10 @@ class VirtualMachine extends EventEmitter {
     /**
      * Abort upload process.
      * @param {string} extensionId - the id of the extension.
-     * @return {Function} Returns a function to restore upload code to peripheral.
+     * @return {Function} Returns a function to aboart upload code to peripheral.
      */
-    abortUploadProcess (extensionId) {
-        return this.runtime.abortUploadProcess(extensionId);
+    abortUploadToPeripheral (extensionId) {
+        return this.runtime.abortUploadToPeripheral(extensionId);
     }
 
     /**

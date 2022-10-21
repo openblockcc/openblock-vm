@@ -74,16 +74,9 @@ class CommonPeripheral{
     
     /**
      * Called by the runtime when user wants to abort the uploading process.
-     * @param {string} code - the code want to upload.
      */
-    abort () {
-        if (this._firmata) {
-            this._firmata.removeAllListeners('reportversion');
-            this._firmata.removeAllListeners('ready');
-            delete this._firmata;
-        }
-
-        this._serialport.abort(this.diveceOpt);
+    abortUpload () {
+        this._serialport.abortUpload();
     }
 
     /**
