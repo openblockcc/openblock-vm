@@ -1020,10 +1020,7 @@ class Runtime extends EventEmitter {
      * @private
      */
     _makeExtensionMenuId (menuName, extensionId) {
-        const deviceType = this.getCurrentDeviceType();
-        if (deviceType) {
-            return `${deviceType}_${extensionId}_menu_${xmlEscape(menuName)}`;
-        }
+        
         return `${extensionId}_menu_${xmlEscape(menuName)}`;
     }
 
@@ -1345,15 +1342,7 @@ class Runtime extends EventEmitter {
      * @private
      */
     _convertBlockForScratchBlocks (blockInfo, categoryInfo) {
-        const deviceType = this.getCurrentDeviceType();
-        let extendedOpcode;
-        if (deviceType) {
-            extendedOpcode = `${deviceType}_${categoryInfo.id}_${blockInfo.opcode}`;
-        } else {
-            extendedOpcode = `${categoryInfo.id}_${blockInfo.opcode}`;
-        }
-
-
+        const extendedOpcode = `${categoryInfo.id}_${blockInfo.opcode}`;
         const blockJSON = {
             type: extendedOpcode,
             inputsInline: true,
@@ -3082,12 +3071,7 @@ class Runtime extends EventEmitter {
      * @property {string} [label] - the label for this opcode if `labelFn` is absent
      */
     getLabelForOpcode (extendedOpcode) {
-        let categoryAndOpcode;
-        if (this.getCurrentDeviceType()) {
-            categoryAndOpcode = StringUtil.splitFirst(extendedOpcode, '_')[1];
-        } else {
-            categoryAndOpcode = extendedOpcode;
-        }
+        const categoryAndOpcode = extendedOpcode;
         const [category, opcode] = StringUtil.splitFirst(categoryAndOpcode, '_');
 
         if (!(category && opcode)) return;

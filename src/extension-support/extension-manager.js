@@ -610,11 +610,12 @@ class ExtensionManager {
     _prepareDeviceInfo (serviceName, deviceInfos) {
         const infos = [];
         const deviceInfosCopy = JSON.parse(JSON.stringify(deviceInfos));
-
+        const deviceType = this.runtime.getCurrentDeviceType();
         deviceInfosCopy.forEach(deviceInfo => {
             if (!/^[a-z0-9]+$/i.test(deviceInfo.id)) {
                 throw new Error('Invalid extension id');
             }
+            deviceInfo.id = `${deviceType}_${deviceInfo.id}`;
             deviceInfo.name = deviceInfo.name || deviceInfo.id;
             deviceInfo.blocks = deviceInfo.blocks || [];
             deviceInfo.targetTypes = deviceInfo.targetTypes || [];
