@@ -44,7 +44,10 @@ class Scratch3DataBlocks {
     setVariableTo (args, util) {
         const variable = util.target.lookupOrCreateVariable(
             args.VARIABLE.id, args.VARIABLE.name);
-        variable.value = args.VALUE;
+
+        if (args.VALUE) {
+            variable.value = args.VALUE;
+        }
 
         if (variable.isCloud) {
             util.ioQuery('cloud', 'requestUpdateVariable', [variable.name, args.VALUE]);
