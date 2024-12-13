@@ -600,7 +600,7 @@ class VirtualMachine extends EventEmitter {
                     device.deviceId = projectJSON.device;
                     device.type = projectJSON.deviceType;
                     device.pnpIdList = projectJSON.pnpIdList;
-                } else if (typeof projectJSON.device === 'object') {
+                } else if (typeof projectJSON.device === 'object' && projectJSON.device !== null) {
                     device = projectJSON.device;
                 }
 
