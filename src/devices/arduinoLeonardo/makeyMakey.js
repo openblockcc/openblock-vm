@@ -33,7 +33,10 @@ const SERIAL_CONFIG = {
  */
 const DIVECE_OPT = {
     type: 'arduino',
-    fqbn: 'SparkFun:avr:makeymakey'
+    fqbn: 'SparkFun:avr:makeymakey',
+    // The time to wait for USB re-recognition after uploading is completed. Darwin and linux will take more time to
+    // rerecognize device, therefore, this parameter should be tested and confirmed under Linux or Darwin system.
+    postUploadDelay: 3000
 };
 
 const Pins = {

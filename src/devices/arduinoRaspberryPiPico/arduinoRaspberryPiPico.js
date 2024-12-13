@@ -40,7 +40,10 @@ const DIVECE_OPT = {
     // Debug Port: Disabled
     // Debug Level: None
     // USB Stack: Pico SDK
-    fqbn: 'rp2040:rp2040:rpipico:flash=2097152_65536,freq=133,opt=Small,rtti=Disabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk' // eslint-disable-line max-len
+    fqbn: 'rp2040:rp2040:rpipico:flash=2097152_65536,freq=133,opt=Small,rtti=Disabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk', // eslint-disable-line max-len
+    // The time to wait for USB re-recognition after uploading is completed. Darwin and linux will take more time to
+    // rerecognize device, therefore, this parameter should be tested and confirmed under Linux or Darwin system.
+    postUploadDelay: 3000
 };
 
 const Pins = {
