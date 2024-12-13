@@ -3,5 +3,4 @@
 
 ## Getting Start
 
-Visit the wiki: openblockcc.github.io
-
+Visit the wiki: [https://wiki.openblock.cc](https://wiki.openblock.cc)
