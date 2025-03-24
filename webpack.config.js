@@ -10,6 +10,9 @@ const base = {
         host: '0.0.0.0',
         port: process.env.PORT || 8073
     },
+    entry: {
+        'extension-worker': path.join(__dirname, 'src/extension-support/extension-worker.js')
+    },
     devtool: 'cheap-module-source-map',
     output: {
         library: 'VirtualMachine',
