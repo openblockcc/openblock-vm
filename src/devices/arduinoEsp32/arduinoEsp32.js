@@ -35,10 +35,23 @@ const SERIAL_CONFIG = {
  */
 const DIVECE_OPT = {
     type: 'arduino',
+    // Upload Speed: "921600" for windows, "460800" for mac and linux
+    // CPU Frequency: "240MHz (WiFi/BT)"
+    // Flash Frequency: "80MHz"
+    // Flash Mode: "QIO"
+    // Flash Size: "4MB (32Mb)"
+    // Partition Scheme: "Default 4MB with spiffs (1.2MB APP/1.5MB SPIFFS)"
+    // Core Debug Level: "None"
+    // PSRAM: "Disabled"
+    // Arduino Runs On: "Core 1"
+    // Events Run On: "Core 1"
+    // Erase All Flash Before Sketch Upload: "Disabled"
+    // JTAG Adapter: "Disabled"
+    // Zigbee Mode: "Disabled"
     fqbn: {
-        darwin: 'esp32:esp32:esp32:UploadSpeed=460800',
-        linux: 'esp32:esp32:esp32:UploadSpeed=460800',
-        win32: 'esp32:esp32:esp32:UploadSpeed=921600'
+        darwin: 'esp32:esp32:esp32:JTAGAdapter=default,PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=460800,LoopCore=1,EventsCore=1,DebugLevel=none,EraseFlash=none,ZigbeeMode=default', // eslint-disable-line max-len
+        linux: 'esp32:esp32:esp32:JTAGAdapter=default,PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=460800,LoopCore=1,EventsCore=1,DebugLevel=none,EraseFlash=none,ZigbeeMode=default', // eslint-disable-line max-len
+        win32: 'esp32:esp32:esp32:JTAGAdapter=default,PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,LoopCore=1,EventsCore=1,DebugLevel=none,EraseFlash=none,ZigbeeMode=default' // eslint-disable-line max-len
     }
 };
 
