@@ -58,10 +58,14 @@ const Pins = {
     A5: 'A5'
 };
 
-
 const Level = {
     High: 'HIGH',
     Low: 'LOW'
+};
+
+const LedState = {
+    On: '1',
+    Off: '0'
 };
 
 const Buadrate = {
@@ -363,6 +367,27 @@ class OpenBlockArduinoUnoR4WifiDevice {
                     description: 'label for low interrup'
                 }),
                 value: InterrupMode.Low
+            }
+        ];
+    }
+
+    get LEDSTATE_MENU () {
+        return [
+            {
+                text: formatMessage({
+                    id: 'arduinoUnoR4Wifi.ledState.on',
+                    default: 'on',
+                    description: 'label for led state on'
+                }),
+                value: LedState.On
+            },
+            {
+                text: formatMessage({
+                    id: 'arduinoUnoR4Wifi.ledState.off',
+                    default: 'off',
+                    description: 'label for led state off'
+                }),
+                value: LedState.Off
             }
         ];
     }
@@ -672,6 +697,106 @@ class OpenBlockArduinoUnoR4WifiDevice {
                 }
             },
             {
+                id: 'display',
+                name: formatMessage({
+                    id: 'arduinoUnoR4Wifi.category.display',
+                    default: 'Display',
+                    description: 'The name of the Arduino Uno R4 Wifi device display category'
+                }),
+                color1: '#4CBFE6',
+                color2: '#2E8EB8',
+                color3: '#2E8EB8',
+                blocks: [
+                    {
+                        opcode: 'showImage',
+                        text: formatMessage({
+                            id: 'arduinoUnoR4Wifi.display.showImage',
+                            default: 'show image [VALUE]',
+                            description: 'Arduino Uno R4 Wifi show image'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            VALUE: {
+                                type: ArgumentType.MATRIX8X12,
+                                defaultValue: '001100011000010010100100010001000100001000001000000100010000000010100000000001000000000000000000' // eslint-disable-line max-len
+                            }
+                        }
+                    },
+                    {
+                        opcode: 'showImageUntil',
+                        text: formatMessage({
+                            id: 'arduinoUnoR4Wifi.display.showImageUntil',
+                            default: 'show image [VALUE] for [TIME] secs',
+                            description: 'Arduino Uno R4 Wifi show image for some times'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            VALUE: {
+                                type: ArgumentType.MATRIX8X12,
+                                defaultValue: '001100011000010010100100010001000100001000001000000100010000000010100000000001000000000000000000' // eslint-disable-line max-len
+                            },
+                            TIME: {
+                                type: ArgumentType.NUMBER,
+                                defaultValue: '1'
+                            }
+                        }
+                    },
+                    {
+                        opcode: 'showUntilScrollDone',
+                        text: formatMessage({
+                            id: 'arduinoUnoR4Wifi.display.showUntilScrollDone',
+                            default: 'show [TEXT] until scroll done',
+                            description: 'Arduino Uno R4 Wifi show until scroll done'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            TEXT: {
+                                type: ArgumentType.STRING,
+                                defaultValue: 'Hello OpenBlock'
+                            }
+                        }
+                    },
+                    {
+                        opcode: 'clearDisplay',
+                        text: formatMessage({
+                            id: 'arduinoUnoR4Wifi.display.clearDisplay',
+                            default: 'clear screen',
+                            description: 'Arduino Uno R4 Wifi clear display'
+                        }),
+                        blockType: BlockType.COMMAND
+                    },
+                    {
+                        opcode: 'lightPixelAt',
+                        text: formatMessage({
+                            id: 'arduinoUnoR4Wifi.display.lightPixelAt',
+                            default: 'light [STATE] at the x: [X] axis, y: [Y] axis',
+                            description: 'Arduino Uno R4 Wifi light pixel at'
+                        }),
+                        blockType: BlockType.COMMAND,
+                        arguments: {
+                            STATE: {
+                                type: ArgumentType.STRING,
+                                menu: 'ledState',
+                                defaultValue: LedState.On
+                            },
+                            X: {
+                                type: ArgumentType.NUMBER,
+                                defaultValue: '0'
+                            },
+                            Y: {
+                                type: ArgumentType.NUMBER,
+                                defaultValue: '0'
+                            }
+                        }
+                    }
+                ],
+                menus: {
+                    ledState: {
+                        items: this.LEDSTATE_MENU
+                    }
+                }
+            },
+            {
                 id: 'serial',
                 name: formatMessage({
                     id: 'arduinoUnoR4Wifi.category.serial',
@@ -878,151 +1003,6 @@ class OpenBlockArduinoUnoR4WifiDevice {
                 menus: {
                     dataType: {
                         items: this.DATA_TYPE_MENU
-                    }
-                }
-            },
-            {
-                id: 'display',
-                name: formatMessage({
-                    id: 'microbit.category.display',
-                    default: 'Display',
-                    description: 'The name of the microbit device display category'
-                }),
-                color1: '#9966FF',
-                color2: '#774DCB',
-                color3: '#774DCB',
-                blocks: [
-                    {
-                        opcode: 'showImage',
-                        text: formatMessage({
-                            id: 'microbit.display.showImage',
-                            default: 'show image [VALUE]',
-                            description: 'microbit show image'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            VALUE: {
-                                type: ArgumentType.MATRIX,
-                                defaultValue: '0101010101100010101000100'
-                            }
-                        }
-                    },
-                    {
-                        opcode: 'showImageUntil',
-                        text: formatMessage({
-                            id: 'microbit.display.showImageUntil',
-                            default: 'show image [VALUE] for [TIME] secs',
-                            description: 'microbit show image for some times'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            VALUE: {
-                                type: ArgumentType.MATRIX,
-                                defaultValue: '0101010101100010101000100'
-                            },
-                            TIME: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '1'
-                            }
-                        }
-                    },
-                    {
-                        opcode: 'show',
-                        text: formatMessage({
-                            id: 'microbit.display.show',
-                            default: 'show [TEXT]',
-                            description: 'microbit show'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            TEXT: {
-                                type: ArgumentType.STRING,
-                                defaultValue: 'Hello OpenBlock'
-                            }
-                        }
-                    },
-                    {
-                        opcode: 'showUntilScrollDone',
-                        text: formatMessage({
-                            id: 'microbit.display.showUntilScrollDone',
-                            default: 'show [TEXT] until scroll done',
-                            description: 'microbit show until scroll done'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            TEXT: {
-                                type: ArgumentType.STRING,
-                                defaultValue: 'Hello OpenBlock'
-                            }
-                        }
-                    },
-                    '---',
-                    {
-                        opcode: 'clearDisplay',
-                        text: formatMessage({
-                            id: 'microbit.display.clearDisplay',
-                            default: 'clear screen',
-                            description: 'microbit clear display'
-                        }),
-                        blockType: BlockType.COMMAND
-                    },
-                    '---',
-                    {
-                        opcode: 'lightPixelAt',
-                        text: formatMessage({
-                            id: 'microbit.display.lightPixelAt',
-                            default: 'light [STATE] at the x: [X] axis, y: [Y] axis',
-                            description: 'microbit light pixel at'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            STATE: {
-                                type: ArgumentType.STRING,
-                                menu: 'ledState',
-                                defaultValue: LedState.On
-                            },
-                            X: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '0'
-                            },
-                            Y: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '0'
-                            }
-                        }
-                    },
-                    {
-                        opcode: 'showOnPiexlbrightness',
-                        text: formatMessage({
-                            id: 'microbit.display.showOnPiexlbrightness',
-                            default: 'show on the x: [X] axis, y: [Y] axis with brightness [BRT]',
-                            description: 'microbit show on piexl brightness'
-                        }),
-                        blockType: BlockType.COMMAND,
-                        arguments: {
-                            X: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '0'
-                            },
-                            Y: {
-                                type: ArgumentType.NUMBER,
-                                defaultValue: '0'
-                            },
-                            BRT: {
-                                type: ArgumentType.STRING,
-                                menu: 'ledBrightness',
-                                defaultValue: '9'
-                            }
-                        }
-                    }
-                ],
-                menus: {
-                    ledState: {
-                        items: this.LEDSTATE_MENU
-                    },
-                    ledBrightness: {
-                        acceptReporters: true,
-                        items: this.LEDBRT_MENU
                     }
                 }
             }
