@@ -11,8 +11,15 @@ const CommonPeripheral = require('../common/common-peripheral');
  * @readonly
  */
 const PNPID_LIST = [
-    // Raspberry Pi Pico
-    'USB\\VID_2E8A&PID_000A'
+    // https://github.com/earlephilhower/arduino-pico/blob/4.4.4/boards.txt
+    'USB\\VID_2E8A&PID_000A',
+    'USB\\VID_2E8A&PID_010A',
+    'USB\\VID_2E8A&PID_400A',
+    'USB\\VID_2E8A&PID_410A',
+    'USB\\VID_2E8A&PID_800A',
+    'USB\\VID_2E8A&PID_810A',
+    'USB\\VID_2E8A&PID_C00A',
+    'USB\\VID_2E8A&PID_C10A'
 ];
 
 /**
@@ -33,14 +40,19 @@ const SERIAL_CONFIG = {
  */
 const DIVECE_OPT = {
     type: 'arduino',
-    // Sketch: 1984KB FS: 64KB
-    // CPU Speed: 133MHz
-    // Optimize: Small (-Os) (standard)
-    // RIIT: Disabled
-    // Debug Port: Disabled
-    // Debug Level: None
-    // USB Stack: Pico SDK
-    fqbn: 'rp2040:rp2040:rpipico:flash=2097152_65536,freq=133,opt=Small,rtti=Disabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk', // eslint-disable-line max-len
+    // Flash Size: "2MB (no FS)"
+    // CPU Speed: "133 MHz"
+    // Optimize: "Small (-Os) (standard)"
+    // Profiling: "Disabled"
+    // RTTI: "Disabled"
+    // Stack Protector: "Disabled"
+    // C++ Exceptions: "Disabled"
+    // Debug Port: "Disabled"
+    // Debug Level: "None"
+    // USB Stack: "Pico SDK"
+    // IP/Bluetooth Stack: "IPv4 Only"
+    // Upload Method: "Default (UF2)
+    fqbn: 'rp2040:rp2040:rpipico:flash=2097152_0,freq=133,opt=Small,profile=Disabled,rtti=Disabled,stackprotect=Disabled,exceptions=Disabled,dbgport=Disabled,dbglvl=None,usbstack=picosdk,ipbtstack=ipv4only,uploadmethod=default', // eslint-disable-line max-len
     // The time to wait for USB re-recognition after uploading is completed. Darwin and linux will take more time to
     // rerecognize device, therefore, this parameter should be tested and confirmed under Linux or Darwin system.
     postUploadDelay: 3000
