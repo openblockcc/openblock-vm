@@ -11,8 +11,9 @@ const CommonPeripheral = require('../common/common-peripheral');
  * @readonly
  */
 const PNPID_LIST = [
-    // Raspberry Pi Pico
-    'USB\\VID_2E8A&PID_000A'
+    // https://github.com/earlephilhower/arduino-pico/blob/4.4.4/boards.txt
+    'USB\\VID_2E8A&PID_F00F',
+    'USB\\VID_2E8A&PID_F10F'
 ];
 
 /**
@@ -132,9 +133,9 @@ const DataType = {
 };
 
 /**
- * Manage communication with a Arduino RaspberryPiPico peripheral over a OpenBlock Link client socket.
+ * Manage communication with a Arduino RaspberryPiPico2W peripheral over a OpenBlock Link client socket.
  */
-class ArduinoRaspberryPiPico extends CommonPeripheral{
+class ArduinoRaspberryPiPico2W extends CommonPeripheral{
     /**
      * Construct a Arduino communication object.
      * @param {Runtime} runtime - the OpenBlock runtime
@@ -147,14 +148,14 @@ class ArduinoRaspberryPiPico extends CommonPeripheral{
 }
 
 /**
- * OpenBlock blocks to interact with a Arduino RaspberryPiPico peripheral.
+ * OpenBlock blocks to interact with a Arduino RaspberryPiPico2W peripheral.
  */
-class OpenBlockArduinoRaspberryPiPicoDevice {
+class OpenBlockArduinoRaspberryPiPico2WDevice {
     /**
      * @return {string} - the ID of this extensGPn.
      */
     get DEVICE_ID () {
-        return 'arduinoRaspberryPiPico';
+        return 'arduinoRaspberryPiPico2W';
     }
 
     get PINS_MENU () {
@@ -286,7 +287,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.modeMenu.input',
+                    id: 'arduinoRaspberryPiPico2W.modeMenu.input',
                     default: 'input',
                     description: 'label for input pin mode'
                 }),
@@ -294,7 +295,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.modeMenu.output',
+                    id: 'arduinoRaspberryPiPico2W.modeMenu.output',
                     default: 'output',
                     description: 'label for output pin mode'
                 }),
@@ -302,7 +303,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.modeMenu.inputPullup',
+                    id: 'arduinoRaspberryPiPico2W.modeMenu.inputPullup',
                     default: 'input-pullup',
                     description: 'label for input-pullup pin mode'
                 }),
@@ -310,7 +311,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.modeMenu.inputPulldown',
+                    id: 'arduinoRaspberryPiPico2W.modeMenu.inputPulldown',
                     default: 'input-pulldown',
                     description: 'label for input-pulldown pin mode'
                 }),
@@ -323,7 +324,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.levelMenu.high',
+                    id: 'arduinoRaspberryPiPico2W.levelMenu.high',
                     default: 'high',
                     description: 'label for high level'
                 }),
@@ -331,7 +332,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.levelMenu.low',
+                    id: 'arduinoRaspberryPiPico2W.levelMenu.low',
                     default: 'low',
                     description: 'label for low level'
                 }),
@@ -361,7 +362,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.InterrupModeMenu.risingEdge',
+                    id: 'arduinoRaspberryPiPico2W.InterrupModeMenu.risingEdge',
                     default: 'rising edge',
                     description: 'label for rising edge interrup'
                 }),
@@ -369,7 +370,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.InterrupModeMenu.fallingEdge',
+                    id: 'arduinoRaspberryPiPico2W.InterrupModeMenu.fallingEdge',
                     default: 'falling edge',
                     description: 'label for falling edge interrup'
                 }),
@@ -377,7 +378,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.InterrupModeMenu.changeEdge',
+                    id: 'arduinoRaspberryPiPico2W.InterrupModeMenu.changeEdge',
                     default: 'change edge',
                     description: 'label for change edge interrup'
                 }),
@@ -385,7 +386,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.InterrupModeMenu.low',
+                    id: 'arduinoRaspberryPiPico2W.InterrupModeMenu.low',
                     default: 'low level',
                     description: 'label for low level interrup'
                 }),
@@ -393,7 +394,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.InterrupModeMenu.high',
+                    id: 'arduinoRaspberryPiPico2W.InterrupModeMenu.high',
                     default: 'high level',
                     description: 'label for high level interrup'
                 }),
@@ -464,7 +465,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.eolMenu.warp',
+                    id: 'arduinoRaspberryPiPico2W.eolMenu.warp',
                     default: 'warp',
                     description: 'label for warp print'
                 }),
@@ -472,7 +473,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.eolMenu.noWarp',
+                    id: 'arduinoRaspberryPiPico2W.eolMenu.noWarp',
                     default: 'no-warp',
                     description: 'label for no warp print'
                 }),
@@ -485,7 +486,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
         return [
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.dataTypeMenu.integer',
+                    id: 'arduinoRaspberryPiPico2W.dataTypeMenu.integer',
                     default: 'integer',
                     description: 'label for integer'
                 }),
@@ -493,7 +494,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.dataTypeMenu.decimal',
+                    id: 'arduinoRaspberryPiPico2W.dataTypeMenu.decimal',
                     default: 'decimal',
                     description: 'label for decimal number'
                 }),
@@ -501,7 +502,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             },
             {
                 text: formatMessage({
-                    id: 'arduinoRaspberryPiPico.dataTypeMenu.string',
+                    id: 'arduinoRaspberryPiPico2W.dataTypeMenu.string',
                     default: 'string',
                     description: 'label for string'
                 }),
@@ -522,8 +523,8 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
          */
         this.runtime = runtime;
 
-        // Create a new Arduino RaspberryPiPico peripheral instance
-        this._peripheral = new ArduinoRaspberryPiPico(this.runtime, this.DEVICE_ID, originalDeviceId);
+        // Create a new Arduino RaspberryPiPico2W peripheral instance
+        this._peripheral = new ArduinoRaspberryPiPico2W(this.runtime, this.DEVICE_ID, originalDeviceId);
     }
 
     /**
@@ -534,9 +535,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             {
                 id: 'pin',
                 name: formatMessage({
-                    id: 'arduinoRaspberryPiPico.category.pins',
+                    id: 'arduinoRaspberryPiPico2W.category.pins',
                     default: 'Pins',
-                    description: 'The name of the arduino RaspberryPiPico device pin category'
+                    description: 'The name of the arduino RaspberryPiPico2W device pin category'
                 }),
                 color1: '#4C97FF',
                 color2: '#3373CC',
@@ -546,9 +547,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'setPinMode',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.setPinMode',
+                            id: 'arduinoRaspberryPiPico2W.pins.setPinMode',
                             default: 'set pin [PIN] mode [MODE]',
-                            description: 'arduinoRaspberryPiPico set pin mode'
+                            description: 'arduinoRaspberryPiPico2W set pin mode'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -567,9 +568,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'setDigitalOutput',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.setDigitalOutput',
+                            id: 'arduinoRaspberryPiPico2W.pins.setDigitalOutput',
                             default: 'set digital pin [PIN] out [LEVEL]',
-                            description: 'arduinoRaspberryPiPico set digital pin out'
+                            description: 'arduinoRaspberryPiPico2W set digital pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -589,9 +590,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
 
                         opcode: 'setPwmOutput',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.setPwmOutput',
+                            id: 'arduinoRaspberryPiPico2W.pins.setPwmOutput',
                             default: 'set pwm pin [PIN] out [OUT]',
-                            description: 'arduinoRaspberryPiPico set pwm pin out'
+                            description: 'arduinoRaspberryPiPico2W set pwm pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -610,9 +611,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'readDigitalPin',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.readDigitalPin',
+                            id: 'arduinoRaspberryPiPico2W.pins.readDigitalPin',
                             default: 'read digital pin [PIN]',
-                            description: 'arduinoRaspberryPiPico read digital pin'
+                            description: 'arduinoRaspberryPiPico2W read digital pin'
                         }),
                         blockType: BlockType.BOOLEAN,
                         arguments: {
@@ -626,9 +627,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'readAnalogPin',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.readAnalogPin',
+                            id: 'arduinoRaspberryPiPico2W.pins.readAnalogPin',
                             default: 'read analog pin [PIN]',
-                            description: 'arduinoRaspberryPiPico read analog pin'
+                            description: 'arduinoRaspberryPiPico2W read analog pin'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -644,9 +645,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
 
                         opcode: 'setServoOutput',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.setServoOutput',
+                            id: 'arduinoRaspberryPiPico2W.pins.setServoOutput',
                             default: 'set servo pin [PIN] out [OUT]',
-                            description: 'arduinoRaspberryPiPico set servo pin out'
+                            description: 'arduinoRaspberryPiPico2W set servo pin out'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -666,9 +667,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
 
                         opcode: 'attachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.attachInterrupt',
+                            id: 'arduinoRaspberryPiPico2W.pins.attachInterrupt',
                             default: 'attach interrupt pin [PIN] mode [MODE] executes',
-                            description: 'arduinoRaspberryPiPico attach interrupt'
+                            description: 'arduinoRaspberryPiPico2W attach interrupt'
                         }),
                         blockType: BlockType.CONDITIONAL,
                         arguments: {
@@ -689,9 +690,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
 
                         opcode: 'detachInterrupt',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.pins.detachInterrupt',
+                            id: 'arduinoRaspberryPiPico2W.pins.detachInterrupt',
                             default: 'detach interrupt pin [PIN]',
-                            description: 'arduinoRaspberryPiPico detach interrupt'
+                            description: 'arduinoRaspberryPiPico2W detach interrupt'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -726,7 +727,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             {
                 id: 'serial',
                 name: formatMessage({
-                    id: 'arduinoRaspberryPiPico.category.serial',
+                    id: 'arduinoRaspberryPiPico2W.category.serial',
                     default: 'Serial',
                     description: 'The name of the arduino RaspberryPiPico device serial category'
                 }),
@@ -738,9 +739,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'raspberryPiPicoMultiSerialBegin',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.serial.raspberryPiPicoMultiSerialBegin',
+                            id: 'arduinoRaspberryPiPico2W.serial.raspberryPiPicoMultiSerialBegin',
                             default: 'serial [NO] begin baudrate [VALUE]',
-                            description: 'arduinoRaspberryPiPico multi serial begin'
+                            description: 'arduinoRaspberryPiPico2W multi serial begin'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -760,9 +761,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'multiSerialPrint',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.serial.multiSerialPrint',
+                            id: 'arduinoRaspberryPiPico2W.serial.multiSerialPrint',
                             default: 'serial [NO] print [VALUE] [EOL]',
-                            description: 'arduinoRaspberryPiPico multi serial print'
+                            description: 'arduinoRaspberryPiPico2W multi serial print'
                         }),
                         blockType: BlockType.COMMAND,
                         arguments: {
@@ -786,9 +787,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'multiSerialAvailable',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.serial.multiSerialAvailable',
+                            id: 'arduinoRaspberryPiPico2W.serial.multiSerialAvailable',
                             default: 'serial [NO] available data length',
-                            description: 'arduinoRaspberryPiPico multi serial available data length'
+                            description: 'arduinoRaspberryPiPico2W multi serial available data length'
                         }),
                         arguments: {
                             NO: {
@@ -803,9 +804,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'multiSerialReadAByte',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.serial.multiSerialReadAByte',
+                            id: 'arduinoRaspberryPiPico2W.serial.multiSerialReadAByte',
                             default: 'serial [NO] read a byte',
-                            description: 'arduinoRaspberryPiPico multi serial read a byte'
+                            description: 'arduinoRaspberryPiPico2W multi serial read a byte'
                         }),
                         arguments: {
                             NO: {
@@ -833,7 +834,7 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
             {
                 id: 'data',
                 name: formatMessage({
-                    id: 'arduinoRaspberryPiPico.category.data',
+                    id: 'arduinoRaspberryPiPico2W.category.data',
                     default: 'Data',
                     description: 'The name of the arduino RaspberryPiPico device data category'
                 }),
@@ -844,9 +845,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'dataMap',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.data.dataMap',
+                            id: 'arduinoRaspberryPiPico2W.data.dataMap',
                             default: 'map [DATA] from ([ARG0], [ARG1]) to ([ARG2], [ARG3])',
-                            description: 'arduinoRaspberryPiPico data map'
+                            description: 'arduinoRaspberryPiPico2W data map'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -876,9 +877,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'dataConstrain',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.data.dataConstrain',
+                            id: 'arduinoRaspberryPiPico2W.data.dataConstrain',
                             default: 'constrain [DATA] between ([ARG0], [ARG1])',
-                            description: 'arduinoRaspberryPiPico data constrain'
+                            description: 'arduinoRaspberryPiPico2W data constrain'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -901,9 +902,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'dataConvert',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.data.dataConvert',
+                            id: 'arduinoRaspberryPiPico2W.data.dataConvert',
                             default: 'convert [DATA] to [TYPE]',
-                            description: 'arduinoRaspberryPiPico data convert'
+                            description: 'arduinoRaspberryPiPico2W data convert'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -922,9 +923,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'dataConvertASCIICharacter',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.data.dataConvertASCIICharacter',
+                            id: 'arduinoRaspberryPiPico2W.data.dataConvertASCIICharacter',
                             default: 'convert [DATA] to ASCII character',
-                            description: 'arduinoRaspberryPiPico data convert to ASCII character'
+                            description: 'arduinoRaspberryPiPico2W data convert to ASCII character'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -938,9 +939,9 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
                     {
                         opcode: 'dataConvertASCIINumber',
                         text: formatMessage({
-                            id: 'arduinoRaspberryPiPico.data.dataConvertASCIINumber',
+                            id: 'arduinoRaspberryPiPico2W.data.dataConvertASCIINumber',
                             default: 'convert [DATA] to ASCII nubmer',
-                            description: 'arduinoRaspberryPiPico data convert to ASCII nubmer'
+                            description: 'arduinoRaspberryPiPico2W data convert to ASCII nubmer'
                         }),
                         blockType: BlockType.REPORTER,
                         arguments: {
@@ -1020,4 +1021,4 @@ class OpenBlockArduinoRaspberryPiPicoDevice {
     }
 }
 
-module.exports = OpenBlockArduinoRaspberryPiPicoDevice;
+module.exports = OpenBlockArduinoRaspberryPiPico2WDevice;
