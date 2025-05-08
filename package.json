@@ -12,7 +12,7 @@
   "main": "./dist/node/openblock-vm.js",
   "browser": "./src/index.js",
   "scripts": {
-    "build": "npm run docs && webpack --progress --colors --bail",
+    "build": "npm run docs && webpack --progress --bail --stats-children",
     "coverage": "tap ./test/{unit,integration}/*.js --coverage --coverage-report=lcov",
     "deploy": "touch playground/.nojekyll",
     "docs": "jsdoc -c .jsdoc.json",
@@ -25,7 +25,7 @@
     "tap:unit": "",
     "tap:integration": "",
     "test": "npm run lint && npm run docs && npm run tap",
-    "watch": "webpack --progress --colors --watch",
+    "watch": "webpack --progress --watch",
     "version": "json -f package.json -I -e \"this.repository.sha = '$(git log -n1 --pretty=format:%H)'\""
   },
   "dependencies": {
@@ -43,13 +43,12 @@
     "loadjs": "^4.2.0",
     "minilog": "3.1.0",
     "node-fetch": "^2.6.1",
-    "scratch-parser": "5.0.0",
+    "scratch-parser": "6.0.0",
     "scratch-sb1-converter": "0.2.7",
     "scratch-translate-extension-languages": "0.0.20191118205314",
     "sweetalert": "^2.1.2",
     "text-encoding": "0.7.0",
-    "valid-url": "^1.0.9",
-    "worker-loader": "^1.1.1"
+    "valid-url": "^1.0.9"
   },
   "peerDependencies": {
     "scratch-svg-renderer": "^0.2.0-prerelease"
@@ -58,15 +57,15 @@
     "@babel/core": "7.13.10",
     "@babel/preset-env": "7.14.8",
     "adm-zip": "0.4.11",
-    "babel-eslint": "10.1.0",
-    "babel-loader": "8.2.2",
+    "@babel/eslint-parser": "7.26.10",
+    "babel-loader": "10.0.0",
     "callsite": "1.0.0",
-    "copy-webpack-plugin": "4.5.4",
+    "copy-webpack-plugin": "13.0.0",
     "docdash": "1.2.0",
     "eslint": "5.3.0",
     "eslint-config-scratch": "5.1.0",
-    "expose-loader": "0.7.5",
-    "file-loader": "2.0.0",
+    "expose-loader": "5.0.1",
+    "file-loader": "6.2.0",
     "format-message-cli": "6.2.0",
     "in-publish": "2.0.1",
     "jsdoc": "3.6.6",
@@ -84,9 +83,10 @@
     "stats.js": "0.17.0",
     "tap": "12.0.1",
     "tiny-worker": "2.3.0",
-    "uglifyjs-webpack-plugin": "1.2.7",
-    "webpack": "4.46.0",
-    "webpack-cli": "3.1.0",
-    "webpack-dev-server": "3.11.2"
-  }
+    "terser-webpack-plugin": "5.3.14",
+    "webpack": "5.98.0",
+    "webpack-cli": "6.0.1",
+    "webpack-dev-server": "5.2.0"
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -1,7 +1,7 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const defaultsDeep = require('lodash.defaultsdeep');
 const path = require('path');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin  = require('terser-webpack-plugin');
 
 const base = {
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
@@ -9,6 +9,9 @@ const base = {
         contentBase: false,
         host: '0.0.0.0',
         port: process.env.PORT || 8073
+    },
+    entry: {
+        'extension-worker': path.join(__dirname, 'src/extension-support/extension-worker.js')
     },
     devtool: 'cheap-module-source-map',
     output: {
@@ -20,18 +23,18 @@ const base = {
             test: /\.js$/,
             loader: 'babel-loader',
             include: path.resolve(__dirname, 'src'),
-            query: {
+            options: {
                 presets: [['@babel/preset-env', {targets: {browsers: ['last 3 versions', 'Safari >= 8', 'iOS >= 8']}}]]
             }
         },
         {
             test: /\.mp3$/,
             loader: 'file-loader'
-        }]
+        },]
     },
     optimization: {
         minimizer: [
-            new UglifyJsPlugin({
+            new TerserPlugin({
                 include: /\.min\.js$/
             })
         ]
@@ -55,7 +58,10 @@ module.exports = [
             rules: base.module.rules.concat([
                 {
                     test: require.resolve('./src/index.js'),
-                    loader: 'expose-loader?VirtualMachine'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "VirtualMachine",
+                    },
                 }
             ])
         }
@@ -97,11 +103,17 @@ module.exports = [
             rules: base.module.rules.concat([
                 {
                     test: require.resolve('./src/index.js'),
-                    loader: 'expose-loader?VirtualMachine'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "VirtualMachine",
+                    },
                 },
                 {
                     test: require.resolve('./src/extensions/scratch3_video_sensing/debug.js'),
-                    loader: 'expose-loader?Scratch3VideoSensingDebug'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "Scratch3VideoSensingDebug",
+                    },
                 },
                 {
                     test: require.resolve('stats.js/build/stats.min.js'),
@@ -109,19 +121,31 @@ module.exports = [
                 },
                 {
                     test: require.resolve('openblock-blocks/dist/vertical.js'),
-                    loader: 'expose-loader?Blockly'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "Blockly",
+                    },
                 },
                 {
                     test: require.resolve('scratch-audio/src/index.js'),
-                    loader: 'expose-loader?AudioEngine'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "AudioEngine",
+                    },
                 },
                 {
                     test: require.resolve('scratch-storage/src/index.js'),
-                    loader: 'expose-loader?ScratchStorage'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "ScratchStorage",
+                    },
                 },
                 {
                     test: require.resolve('scratch-render/src/index.js'),
-                    loader: 'expose-loader?ScratchRender'
+                    loader: "expose-loader",
+                    options: {
+                        exposes: "ScratchRender",
+                    },
                 }
             ])
         },
@@ -129,18 +153,20 @@ module.exports = [
             hints: false
         },
         plugins: base.plugins.concat([
-            new CopyWebpackPlugin([{
-                from: 'node_modules/openblock-blocks/media',
-                to: 'media'
-            }, {
-                from: 'node_modules/scratch-storage/dist/web'
-            }, {
-                from: 'node_modules/scratch-render/dist/web'
-            }, {
-                from: 'node_modules/scratch-svg-renderer/dist/web'
-            }, {
-                from: 'src/playground'
-            }])
+            new CopyWebpackPlugin({
+                patterns:[{
+                    from: 'node_modules/openblock-blocks/media',
+                    to: 'media'
+                }, {
+                    from: 'node_modules/scratch-storage/dist/web'
+                }, {
+                    from: 'node_modules/scratch-render/dist/web'
+                }, {
+                    from: 'node_modules/scratch-svg-renderer/dist/web'
+                }, {
+                    from: 'src/playground'
+                }]
+            }),
         ])
     })
 ];
