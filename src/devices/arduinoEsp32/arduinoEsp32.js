@@ -95,25 +95,6 @@ const Level = {
     Low: 'LOW'
 };
 
-const Channels = {
-    CH0: '0',
-    CH1: '1',
-    CH2: '2',
-    CH3: '3',
-    CH4: '4',
-    CH5: '5',
-    CH6: '6',
-    CH7: '7',
-    CH8: '8',
-    CH9: '9',
-    CH10: '10',
-    CH11: '11',
-    CH12: '12',
-    CH13: '13',
-    CH14: '14',
-    CH15: '15'
-};
-
 const SerialNo = {
     Serial0: '0',
     Serial1: '1',
@@ -561,75 +542,6 @@ class OpenBlockArduinoEsp32Device {
         ];
     }
 
-    get LEDC_CHANNELS_MENU () {
-        return [
-            {
-                text: 'CH0 (LT0)',
-                value: Channels.CH0
-            },
-            {
-                text: 'CH1 (LT0)',
-                value: Channels.CH1
-            },
-            {
-                text: 'CH2 (LT1)',
-                value: Channels.CH2
-            },
-            {
-                text: 'CH3 (LT1)',
-                value: Channels.CH3
-            },
-            {
-                text: 'CH4 (LT2)',
-                value: Channels.CH4
-            },
-            {
-                text: 'CH5 (LT2)',
-                value: Channels.CH5
-            },
-            {
-                text: 'CH6 (LT3)',
-                value: Channels.CH6
-            },
-            {
-                text: 'CH7 (LT3)',
-                value: Channels.CH7
-            },
-            {
-                text: 'CH8 (HT0)',
-                value: Channels.CH8
-            },
-            {
-                text: 'CH9 (HT0)',
-                value: Channels.CH9
-            },
-            {
-                text: 'CH10 (HT1)',
-                value: Channels.CH10
-            },
-            {
-                text: 'CH11 (HT1)',
-                value: Channels.CH11
-            },
-            {
-                text: 'CH12 (HT2)',
-                value: Channels.CH12
-            },
-            {
-                text: 'CH13 (HT2)',
-                value: Channels.CH13
-            },
-            {
-                text: 'CH14 (HT3)',
-                value: Channels.CH14
-            },
-            {
-                text: 'CH15 (HT3)',
-                value: Channels.CH15
-            }
-        ];
-    }
-
     get DAC_PINS_MENU () {
         return [
             {
@@ -739,11 +651,10 @@ class OpenBlockArduinoEsp32Device {
                 text: '0',
                 value: SerialNo.Serial0
             },
-            // Usually IO9/10 is reserved for flash chip.
-            // {
-            //     text: '1',
-            //     value: SerialNo.Serial1
-            // },
+            {
+                text: '1',
+                value: SerialNo.Serial1
+            },
             {
                 text: '2',
                 value: SerialNo.Serial2
@@ -913,7 +824,7 @@ class OpenBlockArduinoEsp32Device {
                         opcode: 'esp32SetPwmOutput',
                         text: formatMessage({
                             id: 'arduinoEsp32.pins.esp32SetPwmOutput',
-                            default: 'set pwm pin [PIN] use channel [CH] out [OUT]',
+                            default: 'set pwm pin [PIN] out [OUT]',
                             description: 'arduinoEsp32 set pwm pin out'
                         }),
                         blockType: BlockType.COMMAND,
@@ -926,11 +837,6 @@ class OpenBlockArduinoEsp32Device {
                             OUT: {
                                 type: ArgumentType.UINT8_NUMBER,
                                 defaultValue: '255'
-                            },
-                            CH: {
-                                type: ArgumentType.NUMBER,
-                                menu: 'ledcChannels',
-                                defaultValue: Channels.CH0
                             }
                         }
                     },
@@ -1009,8 +915,8 @@ class OpenBlockArduinoEsp32Device {
 
                         opcode: 'esp32SetServoOutput',
                         text: formatMessage({
-                            id: 'arduinoEsp32.pins.setServoOutput',
-                            default: 'set servo pin [PIN] use channel [CH] out [OUT]',
+                            id: 'arduinoEsp32.pins.esp32SetServoOutput',
+                            default: 'set servo pin [PIN] out [OUT]',
                             description: 'arduinoEsp32 set servo pin out'
                         }),
                         blockType: BlockType.COMMAND,
@@ -1023,11 +929,6 @@ class OpenBlockArduinoEsp32Device {
                             OUT: {
                                 type: ArgumentType.HALF_ANGLE,
                                 defaultValue: '90'
-                            },
-                            CH: {
-                                type: ArgumentType.NUMBER,
-                                menu: 'ledcChannels',
-                                defaultValue: Channels.CH0
                             }
                         }
                     },
@@ -1090,9 +991,6 @@ class OpenBlockArduinoEsp32Device {
                     level: {
                         acceptReporters: true,
                         items: this.LEVEL_MENU
-                    },
-                    ledcChannels: {
-                        items: this.LEDC_CHANNELS_MENU
                     },
                     dacPins: {
                         items: this.DAC_PINS_MENU
