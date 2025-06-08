@@ -701,7 +701,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             },
                             MODE: {
                                 type: ArgumentType.STRING,
@@ -722,7 +722,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             },
                             LEVEL: {
                                 type: ArgumentType.STRING,
@@ -743,7 +743,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             },
                             OUT: {
                                 type: ArgumentType.UINT8_NUMBER,
@@ -764,7 +764,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             }
                         }
                     },
@@ -780,7 +780,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'analogPins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             }
                         }
                     },
@@ -796,7 +796,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'touchPins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             }
                         }
                     },
@@ -814,7 +814,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             },
                             OUT: {
                                 type: ArgumentType.HALF_ANGLE,
@@ -836,7 +836,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             },
                             MODE: {
                                 type: ArgumentType.STRING,
@@ -859,7 +859,7 @@ class OpenBlockArduinoEsp32S3Device {
                             PIN: {
                                 type: ArgumentType.STRING,
                                 menu: 'pins',
-                                defaultValue: Pins.IO2
+                                defaultValue: Pins.IO1
                             }
                         },
                         programMode: [ProgramModeType.UPLOAD]
