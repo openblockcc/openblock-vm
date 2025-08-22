@@ -38,7 +38,8 @@ class Scratch3ControlBlocks {
             control_get_counter: this.getCounter,
             control_incr_counter: this.incrCounter,
             control_clear_counter: this.clearCounter,
-            control_all_at_once: this.allAtOnce
+            control_all_at_once: this.allAtOnce,
+            control_if_elseif_else: this.ifElseIfElse,
         };
     }
 
@@ -200,6 +201,48 @@ class Scratch3ControlBlocks {
         // "run without screen refresh" custom blocks do now, but this was
         // removed before the release of 2.0.)
         util.startBranch(1, false);
+    }
+
+    extractConditions (args) {
+        const conditions = {};
+        Object.keys(args).forEach(key => {
+            const match = key.match(/^CONDITION(\d+)$/); // 匹配 IF + 数字
+            if (match) {
+                const index = match[1] === '' ? 1 : parseInt(match[1], 10);
+                conditions[index] = Cast.toBoolean(args[key]); // 转换为布尔值
+            }
+        });
+        return conditions;
+    }
+
+    ifElseIfElse(args, util){
+        // 取else的索引
+        var elseIdx = args.mutation && args.mutation.else;
+        // 主 if 条件
+        const mainCondition = Cast.toBoolean(args.CONDITION);
+        if (mainCondition) {
+            util.startBranch(1, false); // 执行主 if 分支
+            return;
+        }
+        // 提取所有 else if 条件
+        const elseIfConditions = this.extractConditions(args);
+        const sortedIndices = Object
+            .keys(elseIfConditions)
+            .map(Number)
+            .sort();
+
+        // 按顺序检查 else if 条件
+        for (let i = 0; i < sortedIndices.length; i++) {
+            const index = sortedIndices[i];
+            if (elseIfConditions[index]) {
+                console.log(index, i+1);
+                util.startBranch(index, false); 
+                return;
+            }
+        }
+
+        // 如果没有 else if 成立，执行 else 分支
+        util.startBranch(elseIdx, false);
     }
 }
 
